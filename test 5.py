@@ -32,6 +32,6 @@ for customer in data:
 
 
 
-
+print('hi')
 
 exit()
