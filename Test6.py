@@ -1,0 +1,4 @@
+
+a = input('Type name:')
+
+
