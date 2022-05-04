@@ -1,10 +1,13 @@
 
 import os
+import shutil
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMainWindow, QListWidgetItem
+from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import QMimeData
+from PyPDF2 import PdfFileMerger
+
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -27,16 +30,29 @@ class MainWindow(QMainWindow):
 
 	def refreshCombinerList(self):
 		self.listWidget.clear()
-		i = self.lineEdit.text()
-		folderPath = i.replace('/','\\\\')
-		fileNames = os.listdir(folderPath)
-		
-		for fileName in fileNames:
-			item = QListWidgetItem(fileName)
-			self.listWidget.addItem(item)
-		
-		numberOfItems = self.listWidget.count()
-		self.label_16.setText(str(numberOfItems))
+
+		if self.lineEdit.text() == '' or self.lineEdit_2.text() == '':
+			msgBox = QMessageBox()
+			msgBox.setIcon(QMessageBox.Information)
+			msgBox.setText("Input and Output folder can't be empty")
+			msgBox.setWindowTitle("Error")
+			msgBox.setStandardButtons(QMessageBox.Ok)
+			msgBox.exec()
+		else:
+			i = self.lineEdit.text()
+			folderPath = i.replace('/','\\\\')
+			fileNames = os.listdir(folderPath)
+			pdf_files = []
+			for fileName in fileNames:
+				if fileName.endswith('.pdf'):
+					pdf_files.append(fileName)
+			
+			for pdf_file in pdf_files:
+				item = QListWidgetItem(pdf_file)
+				self.listWidget.addItem(item)
+			
+			numberOfItems = self.listWidget.count()
+			self.label_16.setText(str(numberOfItems))
 
 
 	def combineAll(self):
@@ -45,15 +61,39 @@ class MainWindow(QMainWindow):
 			print(item[0:5])
 
 	def combineSelected(self):
-		item = self.listWidget.currentItem()
-		itemText = item.text()
-		print(itemText[0:5])
+		if self.listWidget.currentItem() == None:
 
-		i = self.listWidget.currentRow()
-		self.listWidget.takeItem(i)
+			msgBox = QMessageBox()
+			msgBox.setIcon(QMessageBox.Information)
+			msgBox.setText("Nothing selected from list")
+			msgBox.setWindowTitle("Failed to combine")
+			msgBox.setStandardButtons(QMessageBox.Ok)
+			msgBox.exec()
+		else:
 
-		numberOfItems = self.listWidget.count()
-		self.label_16.setText(str(numberOfItems))
+			output_path = self.lineEdit_2.text()
+			item = self.listWidget.currentItem()
+			itemText = item.text()
+			in_path = (self.lineEdit.text() + '\\' +itemText)
+			pod_path = in_path.replace('/', '\\')
+			inv_path = ('C:\\Users\\Maxwell Itule\\Documents\\GitHub\\ProtoEnv\\Assets for Testing\\testinv.pdf')
+
+			merger = PdfFileMerger()
+			merger.append(pod_path)
+			merger.merge(0, inv_path)
+			merger.write(output_path + '\\' + itemText)
+			merger.close()
+
+			os.remove(pod_path)
+
+
+			#removes selected item from list
+			i = self.listWidget.currentRow()
+			self.listWidget.takeItem(i)
+
+			#updates number of files label
+			numberOfItems = self.listWidget.count()
+			self.label_16.setText(str(numberOfItems))
 
 
 	def setInputFolderCombine(self):
