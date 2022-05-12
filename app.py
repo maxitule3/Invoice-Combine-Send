@@ -123,3 +123,6 @@ widget.addWidget(mainwindow)
 widget.setFixedSize(501,590)
 widget.show()
 sys.exit(app.exec_())
+
+
+

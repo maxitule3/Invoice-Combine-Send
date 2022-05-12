@@ -15,7 +15,7 @@ class func:
         print(f'Print {customer.name}\'s invoice')
 
 
-class customer:
+class customer(object):
     def __init__(self, name, email, prt):
         self.name = name
         self.email = email
