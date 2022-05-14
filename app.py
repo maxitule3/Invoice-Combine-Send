@@ -2,11 +2,14 @@
 import os
 import shutil
 import sys
+
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import QMimeData
 from PyPDF2 import PdfFileMerger
+from QBservices import qb_operations
+
 
 
 class MainWindow(QMainWindow):
@@ -76,24 +79,31 @@ class MainWindow(QMainWindow):
 			itemText = item.text()
 			in_path = (self.lineEdit.text() + '\\' +itemText)
 			pod_path = in_path.replace('/', '\\')
-			inv_path = ('C:\\Users\\Maxwell Itule\\Documents\\GitHub\\ProtoEnv\\Assets for Testing\\testinv.pdf')
+			try:
 
-			merger = PdfFileMerger()
-			merger.append(pod_path)
-			merger.merge(0, inv_path)
-			merger.write(output_path + '\\' + itemText)
-			merger.close()
+				invId = qb_operations.get_id(itemText[0:5])
+				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
 
-			os.remove(pod_path)
+				merger = PdfFileMerger()
+				merger.append(pod_path)
+				merger.merge(0, inv_pdf)
+				merger.write(output_path + '\\' + itemText)
+				merger.close()
+
+				os.remove(inv_pdf)
+				os.remove(pod_path)
 
 
-			#removes selected item from list
-			i = self.listWidget.currentRow()
-			self.listWidget.takeItem(i)
+				#removes selected item from list
+				i = self.listWidget.currentRow()
+				self.listWidget.takeItem(i)
 
-			#updates number of files label
-			numberOfItems = self.listWidget.count()
-			self.label_16.setText(str(numberOfItems))
+				#updates number of files label
+				numberOfItems = self.listWidget.count()
+				self.label_16.setText(str(numberOfItems))
+
+			except:
+				print('error')	
 
 
 	def setInputFolderCombine(self):

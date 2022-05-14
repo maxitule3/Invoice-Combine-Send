@@ -27,10 +27,8 @@ data.append(customer('brendan', 'breh@bren.com', False))
 data.append(customer('max', 'max@gmail.com', True))
 data.append(customer('brian', 'brianitule@gmail.com', False))
 
-for customer in data:
-    func.doPrint()
-
-
+h = 'eihviedddddddddddddddhvev'
+print(h[0:5])
 
 
 exit()
