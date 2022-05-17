@@ -6,9 +6,10 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import QMimeData
+from PyQt5 import QtCore
 from PyPDF2 import PdfFileMerger
 from QBservices import qb_operations
+from datetime import datetime
 
 
 
@@ -17,6 +18,10 @@ class MainWindow(QMainWindow):
 		super(MainWindow,self).__init__()
 		loadUi('QBICST.ui',self)
 
+		self.tableWidget.setColumnWidth(0, 140)
+		self.tableWidget.setColumnWidth(1, 200)
+		self.tableWidget.setColumnWidth(2, 50)
+
 		self.CombineInputButton.clicked.connect(self.setInputFolderCombine)
 		self.CombineOutputButton.clicked.connect(self.setOutputFolderCombine)
 		self.toolButton_4.clicked.connect(self.setInputFolderSender)
@@ -24,7 +29,7 @@ class MainWindow(QMainWindow):
 		self.pushButton.clicked.connect(self.refreshCombinerList)
 		self.pushButton_3.clicked.connect(self.combineAll)
 		self.pushButton_4.clicked.connect(self.combineSelected)
-
+		self.pushButton_8.clicked.connect(self.refresh_customer_table)
 
 	def updateCombinerCount(self):
 		numberOfItems = self.listWidget.count()
@@ -104,6 +109,33 @@ class MainWindow(QMainWindow):
 
 			except:
 				print('error')	
+
+	def refresh_customer_table(self):
+		self.tableWidget.clearContents()
+		current_time = datetime.now()
+		dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
+
+
+		cust_dict = qb_operations.get_all_customers()
+		row=0
+		self.tableWidget.setRowCount(len(cust_dict))
+		for cust in cust_dict:
+			self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(cust['DisplayName']))
+			try:
+				self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(cust['PrimaryEmailAddr']['Address']))
+			except:
+				pass
+			item = QtWidgets.QTableWidgetItem()
+			item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+			item.setCheckState(QtCore.Qt.Unchecked)
+			self.tableWidget.setItem(row, 2, item)
+
+			row = row+1
+
+		#sets current on "last refreshed label"
+		current_time = datetime.now()
+		dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
+		self.label_13.setText(dt_string)
 
 
 	def setInputFolderCombine(self):
