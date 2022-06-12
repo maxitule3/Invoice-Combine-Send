@@ -15,8 +15,6 @@ app = fastapi.FastAPI()
 STATE = ""
 AUTH_CODE = ""
 REALM_ID = ""
-# This is populated after we make our request
-TOKEN = ""
 
 app_id = "ABoFQA2csmWne0isXdLLsLhQS2UB5Co0FBJ1HoMZWb2pDem2rI"
 app_key = "Bzfyqe4wb4brTtepkmstCqMCWm6Gbm2pxQsyt3hH"
