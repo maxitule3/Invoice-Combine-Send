@@ -6,3 +6,6 @@ Aight... so... I spent like 4 hours writing like 5 lines of code, but.... I made
 
 
 Another fresh commit. Hopefully ill have this thing fully funtioning minus a few bugs by the end of the week. Well.... fully functioning other than the Oath2 flow. I still have to manually enter an authorization code and refresh token.  - 5/17-2022
+
+
+I needed to take some time off cause i was completley stuck. I finally figured out a solution to the problem i was having. Now i just need to integrate the OAuth2, work on error handeling, get the console working, work on a few other fetures, and lastly fix acouple bugs im aware of. - 7/9/2022
