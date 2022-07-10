@@ -355,6 +355,19 @@
        <string>...</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>74</x>
+        <y>492</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -421,7 +434,7 @@ p, li { white-space: pre-wrap; }
        <number>0</number>
       </property>
       <property name="text">
-       <string>Customer Invoices to Print :</string>
+       <string>Customers :</string>
       </property>
       <property name="textFormat">
        <enum>Qt::AutoText</enum>
@@ -601,30 +614,15 @@ p, li { white-space: pre-wrap; }
        <string>Refresh List</string>
       </property>
      </widget>
-     <widget class="QTableWidget" name="tableWidget">
+     <widget class="QListWidget" name="listWidget_3">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>110</y>
+        <y>100</y>
         <width>431</width>
-        <height>192</height>
+        <height>201</height>
        </rect>
       </property>
-      <column>
-       <property name="text">
-        <string>Name</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Email</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Print</string>
-       </property>
-      </column>
      </widget>
     </widget>
    </widget>
