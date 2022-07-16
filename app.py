@@ -35,21 +35,30 @@ class MainWindow(QMainWindow):
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
 
+	def error_window(self, title, message):
+			msgBox = QMessageBox()
+			msgBox.setIcon(QMessageBox.Information)
+			msgBox.setText(message)
+			msgBox.setWindowTitle(title)
+			msgBox.setStandardButtons(QMessageBox.Ok)
+			msgBox.exec()	
+
+	def console_log(self, message):
+		current_time = datetime.now()
+		dt_string = current_time.strftime('%H:%M:%S')
+		self.textEdit_3.append(f'[{dt_string}] : {message}\n \n')
+		self.textEdit_2.append(f'[{dt_string}] : {message}\n \n')
+
 	def updateCombinerCount(self):
 		numberOfItems = self.listWidget.count()
 		self.label_16.setText(str(numberOfItems))
-
 
 	def refreshCombinerList(self):
 		self.listWidget.clear()
 
 		if self.lineEdit.text() == '' or self.lineEdit_2.text() == '':
-			msgBox = QMessageBox()
-			msgBox.setIcon(QMessageBox.Information)
-			msgBox.setText("Input and Output folder can't be empty")
-			msgBox.setWindowTitle("Error")
-			msgBox.setStandardButtons(QMessageBox.Ok)
-			msgBox.exec()
+			self.error_window('Error', 'Input and Output can\'t be empty')
+			self.console_log('Couldn\'t refresh Combiner list')
 		else:
 			i = self.lineEdit.text()
 			folderPath = i.replace('/','\\\\')
@@ -62,18 +71,14 @@ class MainWindow(QMainWindow):
 			for pdf_file in pdf_files:
 				item = QListWidgetItem(pdf_file)
 				self.listWidget.addItem(item)
-			
+			self.console_log('Combiner list Refreshed')			
 			numberOfItems = self.listWidget.count()
 			self.label_16.setText(str(numberOfItems))
 
 	def refresh_sender_list(self):
 		if self.lineEdit_3.text() == '' or self.lineEdit_4.text() == '':
-			msgBox = QMessageBox()
-			msgBox.setIcon(QMessageBox.Information)
-			msgBox.setText("Input and Output folder can't be empty")
-			msgBox.setWindowTitle("Error")
-			msgBox.setStandardButtons(QMessageBox.Ok)
-			msgBox.exec()
+			self.error_window('Error', 'Input and Output can\'t be empty')
+			self.console_log('Couldn\'t refresh Sender list')
 		else:
 			self.listWidget_2.clear()
 			i = self.lineEdit_3.text()
@@ -93,23 +98,15 @@ class MainWindow(QMainWindow):
 			items_count = self.listWidget_2.count()
 			self.label_17.setText(str(items_count))
 
-
-
 	def combineAll(self):
 		allItems = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
 		for item in allItems:
 			print(item[0:5])
 
-
 	def send_selected(self):
 		if self.listWidget_2.currentItem() == None:
+			self.console_log('Nothing selected from Send list')
 
-			msgBox = QMessageBox()
-			msgBox.setIcon(QMessageBox.Information)
-			msgBox.setText("Nothing selected from list")
-			msgBox.setWindowTitle("Error")
-			msgBox.setStandardButtons(QMessageBox.Ok)
-			msgBox.exec()
 		else:
 			output_path = self.lineEdit_4.text()
 			item = self.listWidget_2.currentItem()
@@ -123,32 +120,29 @@ class MainWindow(QMainWindow):
 				customer_name = qb_operations.get_customer_name(inv)
 
 				for i in customer.customers:
-					if i['name'] == customer_name:
-						if i['prt'] == True:
+					if i.name == customer_name:
+						if i.prt == True:
 
 							webbrowser.open(inv_path)
-							time.sleep(5)
-							shutil.move(inv_path,output)
+							sent_item = self.listWidget_2.currentRow()
+							self.listWidget_2.takeItem(sent_item)
+							self.console_log(f'{inv} was printed!')
 
-						elif i['prt'] == False:
+						elif i.prt == False:
 
-							AppServices.emailer.create_email(i['email'], f'Invoice {inv}', inv_path)
-							time.sleep(5)
-							shutil.move(inv_path,output)
+							AppServices.emailer.create_email(i.email, f'Invoice {inv}', inv_path)
+							sent_item = self.listWidget_2.currentRow()
+							self.listWidget_2.takeItem(sent_item)
+							self.console_log(f'{inv} was sent!')
 
 			except:
-				print('Couldnt find customer name with invoice number')
+				self.console_log('Couldnt find customer name with invoice number')
 
 
 	def combineSelected(self):
 		if self.listWidget.currentItem() == None:
+			self.console_log('Nothing selected from Combine list')
 
-			msgBox = QMessageBox()
-			msgBox.setIcon(QMessageBox.Information)
-			msgBox.setText("Nothing selected from list")
-			msgBox.setWindowTitle("Failed to combine")
-			msgBox.setStandardButtons(QMessageBox.Ok)
-			msgBox.exec()
 		else:
 
 			output_path = self.lineEdit_2.text()
@@ -169,7 +163,6 @@ class MainWindow(QMainWindow):
 
 				os.remove(inv_pdf)
 				os.remove(pod_path)
-
 
 				#removes selected item from list
 				i = self.listWidget.currentRow()
@@ -197,8 +190,7 @@ class MainWindow(QMainWindow):
 			item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
 			item.setCheckState(QtCore.Qt.Unchecked)
 			self.listWidget_3.addItem(item)
-
-			
+		
 			try:
 				cName = cust['DisplayName']
 				cEmail = cust['PrimaryEmailAddr']['Address']
@@ -209,7 +201,6 @@ class MainWindow(QMainWindow):
 
 			customer.new(cName, cEmail, False)
 
-
 	def refresh_prt_state(self):
 		all_items = [self.listWidget_3.item(x) for x in range(self.listWidget_3.count())]
 
@@ -219,7 +210,6 @@ class MainWindow(QMainWindow):
 			if i.checkState() == 2:
 				state = True
 			customer.update_prt(i.text(), state)
-
 
 	def setInputFolderCombine(self):
 		fname = str(QFileDialog.getExistingDirectory(self, "Select a Folder"))

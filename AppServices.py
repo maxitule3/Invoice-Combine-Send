@@ -15,4 +15,3 @@ class emailer:
 		mail_item.To = to
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
-
