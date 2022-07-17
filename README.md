@@ -9,3 +9,6 @@ Another fresh commit. Hopefully ill have this thing fully funtioning minus a few
 
 
 I needed to take some time off cause i was completley stuck. I finally figured out a solution to the problem i was having. Now i just need to integrate the OAuth2, work on error handeling, get the console working, work on a few other fetures, and lastly fix acouple bugs im aware of. - 7/9/2022
+
+
+I pretty much finished everything in my last update to this readme EXCEPT for the Oauth2 implementation. Thats the last piece of the puzzle before V.1 is working the way i want it and ill be able to actually use this in production.  - 7/17/2022 
