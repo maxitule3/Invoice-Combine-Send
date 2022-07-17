@@ -10,14 +10,14 @@ from quickbooks.objects import Account, Attachable, Invoice, Customer
 auth_client = AuthClient(
 	client_id='AB1Q6F1f7BWpIdLcEaTIW3UIXdyigjCeaSLQ5seIEt6eIxD5i7',
 	client_secret='9p0V0MuWAYE8VKLg7ba6MLSVDJZwdzr7RBA5P6LL',
-	access_token='eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..f0Qc-lhhIoWj1QQNDX3dKg.SO6TYLSL3Yt6p48F7WC8YtaKdXOeVaGG2JE6_0Rm3oKMwGOdHYX1DuEwWheSIhjCLd3c-7qU2sKYbeNPAG8j8EQ4G_jH1hE4mhBSCS5XMd4FrS0XmRovyFgSdtspnbg_8H_SqdpxQjIpW0LC8uyZjBh2VRWMDIooeqHt1FnV7QLN-lkT_Thz-Rp8K9u7-atCnbS56RBIo-Gn03O15SMlvTagZvwWix4uQXOp1_bkUnSlYGVUfEC94vKykyjYItN1qtADwWwOQCeGvMVMO3v5o9w59fNXuZL9jzYGsnBZzRfum20UV2eM14tzF1W8j8aqbAQxmwhikINNsjVObBxXtDoSaYDSzjW2tubuUD9kfv00kKdrhhPvKRlYPRM86xDPdJ8pMB5kt5GNZaiYafCht0wwkEIbAi6_VPHS6rjiS6VJIJRAFr1elytDu69_4YyGhFdJrViJ0zSGIl-A6aztyvmyMC8v2-oA-PLHaoZ5S7ISTySZa_Y4jAgKIlW3glAO6i3qnofI0YwvIrI89ieYYg4ZHUqIL3fCJ9fSH5SoMgEOc_gNkKG7H9uhC5tuDypXpHE6IR5XVHVyQfGqvzqKbPeQPsPoX4eNSmwc1eAHrTO1rK_NM_FBU9b8iNMaOAzdtuRRILF2NOzcJqVCrxtIkSfjkhxO0T_A8ANRFQrWMm86Z62XkXfXHeQt-BS22ruBTC2y-NdBo4QFhiDDEMqz5K7wbddA6iXOdxDug6wbIKnA9yG3ARNokHAzpKdM2E54uMJwc8enZBn5b6ozBpwtX2vr-QSQZ_S1ik-_QlNNELxe-C1hAo-LE-ZL_zAbez6LWW8th-9O3EVA_guGBoFbKekscCCB4P1o_EiDTBTDuFWWhKTU6Qvv957JH4RHxuS2.oS6ij9_UuCBk5ez9AJK1Zg',
+	access_token='eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..8uMAMoH3BVieubLPiUH3Wg.7wfXE1vhu8avFysxzrf3XxdkTNZJ1i5f8FyudrzoQVcjKn5yhccQ54vN2-Wj2-6VUilV2oJtehGVIGOn2QRZWpcCoRjRgVrOmhO74n3Domp8V6N4ZoVQ17tcodPXduGTDLe4HE4BuSHqtyuozLdcTTZJjTJ9ktVVsPy1M63gcTWaooQd1cTXTZqawOifkUiPJjogZDYD2eNvR1vAVbEt4Jj2YKb1Pbg18fo0cGnszrhmYN2SCZC4_GEZXBNCgKLv1ya-pTUssH6li1f12QTBr5NOsdh8DXUd9Lmgzz0ixvK1GBuMk3ujeHxiB8A1QQasK3Lx-1lH5LGppVA0uQhyMZyUvJmShVFLFrf-yBUBcEPT0qGLit_FIu4CO3ShTC0LMqq3FTyA4s-30xhy_GAUtpYSuMefOdHykY6aWHJneXAt9MprCW5rxl73CEXi-iRbxjJfVCOgjE0JZ_diCydXbD5IPpArbTfAgTKS0nWR6E6gUQUY7PUCLVcJ__Mbu45uEo19tB90gD4qTJU5uO7K4woUl4xRuL6xgAYV3fhEUhKmp00PHsWz994oTQ06d_jqT4KLhgpNBasxFbT95aTNRiMXWarnnyuNhxqYzDyVhcodKYTh6j9Q83rAsX5UEwXuCcu1KXwSClKFl-xFOR0rNSTOR60-03QWm0rF9qJyo9zaFAnla6Fz35BfLZtgHxOh8j0OPK7ega5yLAGbd5DHrb9WYZHcAO2DvwHSPGnGJth8yC71cbBOgNyyHJ4RKQgADszOdUY00GdaLvDNTXv0am-dP-jyy0sP-DVAyY7NNK52jECXFaljACBw52_n5HhDUQjciliHtAqA09KT7v1kef22gmaKmFH35nvOjCH_0NTflTqAJYs0ZrsCi3fykX3v.1SVbjRuXv7dM7IeDqZIOKA',
 	environment='sandbox',
 	redirect_uri='http://localhost:8000/callback',
 	)
 
 client = QuickBooks(
 	auth_client=auth_client,
-	refresh_token='AB11666664350PEvHnrBmz64rwHlgWrZbRANUlWBxJM5mzJ5zC',
+	refresh_token='AB11666759872XUiCfknE1GLYK5HaopDqDZgy3a919bMXNwAaG',
 	company_id='4620816365213833550',
 	minorversion=63
 	)
@@ -90,6 +90,7 @@ class qb_operations(Invoice, Customer):
 			print('Inv # provided may not exist')	
 
 
+
 	def get_customer_name(inv_num):
 		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
 		for inv in responce:
@@ -99,3 +100,16 @@ class qb_operations(Invoice, Customer):
 
 		return str(inv_cust)
 
+	def get_invoice_details(inv_num):
+		#This will return a Tuple - (Customer Name, Invoice Balance, Invoice Due date, Pay Term)
+
+		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
+		for inv in responce:
+			json_data = inv.to_json()
+			inv_dict = json.loads(json_data)
+			inv_cust = (inv_dict["CustomerRef"]["name"])
+			inv_amount = (inv_dict["Balance"])
+			inv_due = (inv_dict["DueDate"])
+			inv_term = (inv_dict["SalesTermRef"]["name"])
+
+		return inv_cust, inv_amount, inv_due, inv_term

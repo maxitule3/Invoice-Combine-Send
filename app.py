@@ -7,10 +7,10 @@ from CustClass import customer
 import time
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QMimeData
+from PyQt5 import QtCore
+
 from PyPDF2 import PdfFileMerger
 from QBservices import qb_operations
 from datetime import datetime
@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
 		self.pushButton_2.clicked.connect(self.refresh_sender_list)
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
+
 
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
@@ -117,8 +118,12 @@ class MainWindow(QMainWindow):
 
 			try:
 				inv = item_name[0:5]
-				customer_name = qb_operations.get_customer_name(inv)
-
+				inv_tuple = qb_operations.get_invoice_details(inv)
+				inv_terms = inv_tuple[3]
+				inv_balance = inv_tuple[1]
+				inv_date = inv_tuple[2]
+				customer_name = inv_tuple[0]
+			
 				for i in customer.customers:
 					if i.name == customer_name:
 						if i.prt == True:
@@ -129,14 +134,25 @@ class MainWindow(QMainWindow):
 							self.console_log(f'{inv} was printed!')
 
 						elif i.prt == False:
+							if self.checkBox.checkState() == 2:
 
-							AppServices.emailer.create_email(i.email, f'Invoice {inv}', inv_path)
-							sent_item = self.listWidget_2.currentRow()
-							self.listWidget_2.takeItem(sent_item)
-							self.console_log(f'{inv} was sent!')
+								email_custom = self.textEdit.toHtml()
+								AppServices.emailer.create_email(i.email, f'Invoice {inv}', inv_path, email_custom)
+
+								sent_item = self.listWidget_2.currentRow()
+								self.listWidget_2.takeItem(sent_item)
+								self.console_log(f'{inv} was sent!')
+
+							else:
+								AppServices.emailer.create_invoice_email(i.email, f'Invoice {inv}', inv_path, inv, inv_date, inv_terms, inv_balance)
+
+								sent_item = self.listWidget_2.currentRow()
+								self.listWidget_2.takeItem(sent_item)
+								self.console_log(f'{inv} was sent!')
 
 			except:
-				self.console_log('Couldnt find customer name with invoice number')
+				self.console_log('Error with Quickbooks API call - Invoice number may not exist in QuickBooks')
+
 
 
 	def combineSelected(self):
