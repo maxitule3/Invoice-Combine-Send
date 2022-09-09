@@ -4,6 +4,10 @@ from intuitlib.enums import Scopes
 import requests
 import uvicorn
 import os
+import test
+import threading
+import webbrowser
+import Constants
 
 # set up fastAPI
 from intuitlib.exceptions import AuthClientError
@@ -16,11 +20,11 @@ STATE = ""
 AUTH_CODE = ""
 REALM_ID = ""
 
-app_id = "ABoFQA2csmWne0isXdLLsLhQS2UB5Co0FBJ1HoMZWb2pDem2rI"
-app_key = "Bzfyqe4wb4brTtepkmstCqMCWm6Gbm2pxQsyt3hH"
+app_id = "AB1Q6F1f7BWpIdLcEaTIW3UIXdyigjCeaSLQ5seIEt6eIxD5i7"
+app_key = "9p0V0MuWAYE8VKLg7ba6MLSVDJZwdzr7RBA5P6LL"
 
 
-intuit_oauth = AuthClient(
+auth_client = AuthClient(
     app_id,
     app_key,
     "http://localhost:8000/oauth",
@@ -29,41 +33,49 @@ intuit_oauth = AuthClient(
 
 @app.get("/authorize")
 def authorize(request: fastapi.Request):
-    print("authorize!")
-    auth_url = intuit_oauth.get_authorization_url([Scopes.ACCOUNTING])
-    print(f"auth url is {auth_url}")
-    os.system(f"open \"{auth_url}\"")
+    #print("authorize!")
+    auth_url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
+    #print(f"auth url is {auth_url}")
+    #os.system(f"open \"{auth_url}\"")
     # On shitty-ass Windows
-    # os.system("start \"\" https://example.com")
-    # response = requests.session().get(auth_url)
+    webbrowser.open(auth_url)
+    #response = requests.session().get(auth_url)
+
 
 @app.get("/oauth")
 def get_oauth(request: fastapi.Request):
     print("oauth!")
     print("oauth request incoming")
-    STATE = request.query_params.get("state")
-    AUTH_CODE = request.query_params.get("code")
-    REALM_ID = request.query_params.get("realmId")
+    Constants.STATE = request.query_params.get("state")
+    Constants.AUTH_CODE = request.query_params.get("code")
+    Constants.REALM_ID = request.query_params.get("realmId")
 
     try:
-        intuit_oauth.get_bearer_token(AUTH_CODE, realm_id=REALM_ID)
-        TOKEN = intuit_oauth.state_token
-        return f"state_token is {TOKEN}, refresh_token is {intuit_oauth.refresh_token}"
+        auth_client.get_bearer_token(Constants.AUTH_CODE, realm_id=Constants.REALM_ID)
+        Constants.TOKEN = auth_client.state_token
+        return f"state_token is {Constants.TOKEN}, refresh_token is {auth_client.refresh_token}"
     except AuthClientError as e:
-        print(f"chingada madre {e}")
-
+        print(e.status_code)
+        print(e.content)
+        print(e.intuit_tid)
 
 def main():
-    """
-    This starts up a local webserver on port 8000, and you kick off the oauth flow by hitting
-    http://localhost:8000/authorize
-    ¡ORALE!
+    # """
+    # This starts up a local webserver on port 8000, and you kick off the oauth flow by hitting
+    # http://localhost:8000/authorize
+    # ¡ORALE!
 
-    To use this in your app, you'd add a button that opened that URL in a window, then store the returned
-    code in an object that the app had access to.
-    """
+    # To use this in your app, you'd add a button that opened that URL in a window, then store the returned
+    # code in an object that the app had access to.
+    # """
     uvicorn.run("test_oauth:app", host="0.0.0.0", port=8000, reload=True)
 
 
-if __name__ == "__main__":
+class Oauth_func():
+    def get_token():
+        return(refresh_tok)
+
+
+
+if __name__ == '__main__':
     main()
