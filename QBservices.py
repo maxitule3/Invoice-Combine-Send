@@ -87,7 +87,7 @@ class qb_operations(Invoice, Customer):
 
 		except:
 			'''I need to create an error handeler class. I'm just having a comment printed to console for now'''
-			print('Inv # provided may not exist')	
+			print('Inv # provided may not exist')
 
 
 

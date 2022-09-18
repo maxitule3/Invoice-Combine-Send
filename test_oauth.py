@@ -39,8 +39,13 @@ def authorize(request: fastapi.Request):
     #os.system(f"open \"{auth_url}\"")
     # On shitty-ass Windows
     webbrowser.open(auth_url)
-    #response = requests.session().get(auth_url)
+    #response = request.session().get(auth_url)
 
+
+def authorize_1():
+    print("authorize!")
+    auth_url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
+    webbrowser.open(auth_url)
 
 @app.get("/oauth")
 def get_oauth(request: fastapi.Request):
@@ -50,16 +55,20 @@ def get_oauth(request: fastapi.Request):
     Constants.AUTH_CODE = request.query_params.get("code")
     Constants.REALM_ID = request.query_params.get("realmId")
 
-    try:
-        auth_client.get_bearer_token(Constants.AUTH_CODE, realm_id=Constants.REALM_ID)
-        Constants.TOKEN = auth_client.state_token
-        return f"state_token is {Constants.TOKEN}, refresh_token is {auth_client.refresh_token}"
-    except AuthClientError as e:
-        print(e.status_code)
-        print(e.content)
-        print(e.intuit_tid)
+    print(Constants.STATE)
+    print(Constants.AUTH_CODE)
+    print(Constants.REALM_ID)
 
-def main():
+    # try:
+    #     auth_client.get_bearer_token(Constants.AUTH_CODE, realm_id=Constants.REALM_ID)
+    #     Constants.TOKEN = auth_client.state_token
+    #     return f"state_token is {Constants.TOKEN}, refresh_token is {auth_client.refresh_token}"
+    # except AuthClientError as e:
+    #     print(e.status_code)
+    #     print(e.content)
+    #     print(e.intuit_tid)
+
+def start_srv():
     # """
     # This starts up a local webserver on port 8000, and you kick off the oauth flow by hitting
     # http://localhost:8000/authorize
@@ -71,11 +80,11 @@ def main():
     uvicorn.run("test_oauth:app", host="0.0.0.0", port=8000, reload=True)
 
 
-class Oauth_func():
-    def get_token():
-        return(refresh_tok)
+# class Oauth_func():
+#     def get_token():
+#         return(refresh_tok)
 
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
