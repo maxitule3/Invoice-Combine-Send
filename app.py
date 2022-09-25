@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 import sqlite3
-from CustClass import customer
+from AppServices import Customer
 import time
 
 from PyQt5 import QtWidgets
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
 				inv_date = inv_tuple[2]
 				customer_name = inv_tuple[0]
 			
-				for i in customer.customers:
+				for i in Customer.customers:
 					if i.name == customer_name:
 						if i.prt == True:
 
@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
 	def refresh_customer_list(self):
 
 		self.listWidget_3.clear()
-		customer.customers.clear()
+		Customer.customers.clear()
 		current_time = datetime.now()
 		dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
 		self.label_13.setText(dt_string)
@@ -215,7 +215,7 @@ class MainWindow(QMainWindow):
 				cName = cust['DisplayName']
 				cEmail = None
 
-			customer.new(cName, cEmail, False)
+			Customer.new(cName, cEmail, False)
 
 	def refresh_prt_state(self):
 		all_items = [self.listWidget_3.item(x) for x in range(self.listWidget_3.count())]
@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
 			
 			if i.checkState() == 2:
 				state = True
-			customer.update_prt(i.text(), state)
+			Customer.update_prt(i.text(), state)
 
 	def setInputFolderCombine(self):
 		fname = str(QFileDialog.getExistingDirectory(self, "Select a Folder"))

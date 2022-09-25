@@ -12,24 +12,20 @@ class Serv(BaseHTTPRequestHandler):
 
     def do_GET(self):
 
-        if self.path.endswith('/index'):
-
+            print(self.path)
             self.send_response(200)
             self.send_header("Content-type", "text/html")
-            self.end_headers()        
+            self.end_headers() 
+      
             self.wfile.write(bytes("<!DOCTYPE html><html><body><h3>You may now close this window!</h3></body></html>", 'utf-8'))
-
+            print(f'NEW PATH IS --- {self.path}')
             params_url = self.path
             parsed_url = urlparse(params_url)
 
-        else:
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()        
-            self.wfile.write(bytes("<!DOCTYPE html><html><body><h3>You may now close this window!</h3></body></html>", 'utf-8'))
+            print(f'this is the pares url {parsed_url}')
+            
 
-            params_url = self.path
-            parsed_url = urlparse(params_url)
+
 
 
 

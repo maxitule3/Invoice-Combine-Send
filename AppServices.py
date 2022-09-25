@@ -1,10 +1,7 @@
-
-
 import os
 import win32com.client as win32
 
-class emailer:
-
+class emailer():
 
 	def create_email(to, subject, attachment_path, email_body):
 	#email body is required to formated in HTML
@@ -54,3 +51,23 @@ The complete version has been provided as an attachment to this email
 		mail_item.To = to
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
+
+
+class Customer():
+
+    customers = []
+
+    def __init__(self, name, email, prt):
+        self.name = name
+        self.email = email
+        self.prt = prt
+
+    def new(name, email, prt):
+        cust = Customer(name, email, prt)
+        Customer.customers.append(cust)
+
+    def update_prt(name, prt):
+
+        for i in Customer.customers:
+            if i.name == name:
+                i.prt = prt

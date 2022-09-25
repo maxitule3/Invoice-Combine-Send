@@ -63,7 +63,6 @@ def auth_test():
 
     
 def authorize():
-    print("authorize!")
     auth_url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
     webbrowser.open(auth_url)
     # response = request.session().get(auth_url)

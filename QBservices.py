@@ -5,6 +5,7 @@ from intuitlib.client import AuthClient
 import json
 from quickbooks import QuickBooks
 from quickbooks.objects import Account, Attachable, Invoice, Customer
+import sqlite3
 
 
 auth_client = AuthClient(
@@ -113,3 +114,24 @@ class qb_operations(Invoice, Customer):
 			inv_term = (inv_dict["SalesTermRef"]["name"])
 
 		return inv_cust, inv_amount, inv_due, inv_term
+
+
+class db_operations():
+
+	def db_exists():
+		result = os.path.exists('appdata.db')
+		return(result)
+
+	def customer_exists(customer_name):
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT * FROM customer_data WHERE customer_name=?", (customer_name,))
+		if c.fetchone() == None:
+			return False
+
+		else:
+			return True
+
+		conn.commit()
+		conn.close()

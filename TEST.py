@@ -1,4 +1,5 @@
 
+import webbrowser
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUi
@@ -19,19 +20,16 @@ class MainWindow(QMainWindow):
         self.pushButton_2.setText('auth')
 
         self.pushButton_3.clicked.connect(self.strt_srv)
-        self.pushButton_4.clicked.connect(self.prt_param)
-        self.pushButton_2.clicked.connect(self.auth)
+        self.pushButton_2.clicked.connect(self.start_flow)
+
     
     def strt_srv(self):
         srv_thread = threading.Thread(target=server.start_srv, daemon=True)
         srv_thread.start()
 
-
-    def prt_param(self):
-        otest.auth_test()
-
-    def auth(self):
+    def start_flow(self):
         otest.authorize()
+
 
     
 
