@@ -5,18 +5,15 @@ import sys
 import sqlite3
 from AppServices import Customer
 import time
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore
-
 from PyPDF2 import PdfFileMerger
 from QBservices import qb_operations
 from datetime import datetime
 import AppServices
 import webbrowser
-
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -34,7 +31,6 @@ class MainWindow(QMainWindow):
 		self.pushButton_2.clicked.connect(self.refresh_sender_list)
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
-
 
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
@@ -153,8 +149,6 @@ class MainWindow(QMainWindow):
 			except:
 				self.console_log('Error with Quickbooks API call - Invoice number may not exist in QuickBooks')
 
-
-
 	def combineSelected(self):
 		if self.listWidget.currentItem() == None:
 			self.console_log('Nothing selected from Combine list')
@@ -189,7 +183,7 @@ class MainWindow(QMainWindow):
 				self.label_16.setText(str(numberOfItems))
 
 			except:
-				print('error')	
+				self.console_log('error')	
 
 	def refresh_customer_list(self):
 

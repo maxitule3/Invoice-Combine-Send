@@ -51,18 +51,16 @@ def authorize_1():
 def get_oauth(request: fastapi.Request):
     print("oauth!")
     print("oauth request incoming")
-    Constants.STATE = request.query_params.get("state")
-    Constants.AUTH_CODE = request.query_params.get("code")
-    Constants.REALM_ID = request.query_params.get("realmId")
+    STATE = request.query_params.get("state")
+    AUTH_CODE = request.query_params.get("code")
+    REALM_ID = request.query_params.get("realmId")
 
-    print(Constants.STATE)
-    print(Constants.AUTH_CODE)
-    print(Constants.REALM_ID)
+
 
     # try:
-    #     auth_client.get_bearer_token(Constants.AUTH_CODE, realm_id=Constants.REALM_ID)
-    #     Constants.TOKEN = auth_client.state_token
-    #     return f"state_token is {Constants.TOKEN}, refresh_token is {auth_client.refresh_token}"
+    #     auth_client.get_bearer_token(AUTH_CODE, realm_id=REALM_ID)
+    #     TOKEN = auth_client.state_token
+    #     return f"state_token is {TOKEN}, refresh_token is {auth_client.refresh_token}"
     # except AuthClientError as e:
     #     print(e.status_code)
     #     print(e.content)
