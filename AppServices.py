@@ -1,5 +1,6 @@
 import os
 import win32com.client as win32
+import sqlite3
 
 class emailer():
 
@@ -26,7 +27,7 @@ class emailer():
 <tbody>
 <tr>
 <td style="padding:15.0pt 15.0pt 15.0pt 15.0pt">
-<p><span style="font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif">------------------------   Invoice Summary  --------------------------<span style="color:black"><br>
+<p><span style="font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif">--------------------------Invoice--Summary--------------------------<span style="color:black"><br>
 Invoice# : <b>{invoice_numb}</b><br>
 Invoice Due Date : <b>{invoice_due_date}</b><br>
 Terms : <b>{invoice_term}</b><br>
@@ -71,3 +72,90 @@ class Customer():
         for i in Customer.customers:
             if i.name == name:
                 i.prt = prt
+
+
+class db_operations():
+
+	def db_exists():
+		result = os.path.exists('appdata.db')
+		return(result)
+
+	def update_token(new_token):
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("UPDATE qbauth SET token=:token", {'token': new_token})
+		conn.commit()
+		conn.close()
+
+	def update_refresh(new_token):
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("UPDATE qbauth SET refresh_token=:token", {'token': new_token})
+		conn.commit()
+		conn.close()
+		
+	def customer_exists(customer_name):
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT * FROM customer_data WHERE customer_name=?", (customer_name,))
+		if c.fetchone() == None:
+			conn.close()
+			return False
+
+		else:
+			conn.close()
+			return True
+	
+	def get_code():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT code FROM qbauth")
+		responce = c.fetchone()[0]
+		conn.commit()
+		conn.close()
+		return(responce)
+
+	def get_state():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT state FROM qbauth")
+		responce = c.fetchone()[0]
+		conn.commit()
+		conn.close()
+		return(responce)
+
+	def get_realmId():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT realm FROM qbauth")
+		responce = c.fetchone()[0]
+		conn.commit()
+		conn.close()
+		return(responce)
+
+	def get_token():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT token FROM qbauth")
+		responce = c.fetchone()[0]
+		conn.commit()
+		conn.close()
+		return(responce)
+
+	def get_refresh():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+
+		c.execute("SELECT refresh_token FROM qbauth")
+		responce = c.fetchone()[0]
+		conn.commit()
+		conn.close()
+		return(responce)
+
