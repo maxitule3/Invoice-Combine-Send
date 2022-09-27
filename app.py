@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
 			msgBox.setWindowTitle(title)
 			msgBox.setStandardButtons(QMessageBox.Ok)
 			msgBox.exec()
-
+			
 	def console_log(self, message):
 		current_time = datetime.now()
 		dt_string = current_time.strftime('%H:%M:%S')
