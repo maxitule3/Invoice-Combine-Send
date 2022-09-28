@@ -2,38 +2,72 @@ import os
 import sys
 from intuitlib.enums import Scopes
 from intuitlib.client import AuthClient
+from intuitlib.exceptions import AuthClientError
+import webbrowser
 import json
 from quickbooks import QuickBooks
 from quickbooks.objects import Account, Attachable, Invoice, Customer
+from AppServices import db_operations as db
 
 
-
-
-auth_client = AuthClient(
+intuit_oauth = AuthClient(
 	client_id='AB1Q6F1f7BWpIdLcEaTIW3UIXdyigjCeaSLQ5seIEt6eIxD5i7',
-	client_secret='9p0V0MuWAYE8VKLg7ba6MLSVDJZwdzr7RBA5P6LL',
-	access_token='eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..hcKei0Wwck7UnXmwCtKdkA.DDssrShCwjofy8EH3B3hUQJHJSqZOFylB73FucRvSMbdo6oT-9VlQiAHqA_maEYpXafTtP8a59NAQqqWDnIXNuGltzllr94scpa0cdGXJD5VheCk9HxG5LVfFJqCWj-7DgQf8sDfGWwhINukXuP70ociWLub0hz6Swi9cQfnT2q9vZ2aDd8_I3u3Ie8PFVFdQ4J2NuyuqBiUCd5yomlrcqoeTsb3b2CVG8R6UHSupOKn_ZblO0Q5rViGr9TO40zKvlo2M95x5Buat-Hbl3YylY2DRzkXwOVPX7kqEpcc0U6UvPSuRSI1uY1yEPdjOWHE8x6Wrc04isqoKtdmDallyVpBApu_oHciybvtGe0xFCnVSOtiSKmHdsyZ1fOPlGv_85crXGqACj7rVXEbe9X6zax5fZ73YaROynrqwzdUh4FM1Y03L3dCX88I0PEXBgg7AOC7dAjJYcDbJr7H-QP1AmLwFkVklJ0mtxZgzJnXk0A5O5NycLk7Xb3EBCGiwKT-akLKh7oHBLDPWEd3ovxHRX_zkDDZ3VN6SUl6DV5IBab4sR1OvchTfohafVI4RKL2X21fju0JDwXJgYVcZWl3EFc5IkSRlIpnEkU-yXY5gI1rmjQuQy7nUqoJpsIhhRpZ8ILLC8qkUi09668a_e7gxenmIiBcaayU_q7VYdbZlddxNE3KnoPlaD3SMwhgq0ljRlBtaL60zllrwYCGAm-L_pE_YPWSXjvvtlYWFJNaMA6Srd8JBD5ol6LDpD6qaYQg.cLGBf_Xc5a2d5rOgltUYEg',
+	client_secret=db.get_oauth('app_key'),
+	access_token=db.get_oauth('token'),
 	environment='sandbox',
 	redirect_uri='http://localhost:8000/',
 	)
 
-client = QuickBooks(
-	auth_client=auth_client,
-	refresh_token='AB116683871600wVcf6F8XH1nZ2RyKSV9nmGgO2Aa7l4YDyudS',
-	company_id='4620816365213833550',
-	minorversion=63
-	)
+def client():
+
+	return	QuickBooks(
+		auth_client=intuit_oauth,
+		refresh_token=db.get_oauth('refresh_token'),
+		company_id=db.get_oauth('realm'),
+		minorversion=63
+		)
+
+
+def auth_test():
+
+    state = db.get_oauth('state')
+    auth_code = db.get_oauth('code')
+    realm_id = db.get_oauth('realm')
+
+    try:
+        intuit_oauth.get_bearer_token(auth_code, realm_id=realm_id)
+
+        db.update_value('qbauth', 'token', intuit_oauth.access_token)
+        db.update_value('qbauth', 'refresh_token', intuit_oauth.refresh_token)
+
+        db.update_token_expire()
+
+
+    except AuthClientError as e:
+        # just printing here but it can be used for retry workflows, logging, etc
+        print(e.status_code)
+        print(e.content)
+        print(e.intuit_tid)
+
+
+def get_new_token():
+    intuit_oauth.refresh(refresh_token=db.get_oauth('refresh_token'))
+
+
+def authorize():
+    auth_url = intuit_oauth.get_authorization_url([Scopes.ACCOUNTING])
+    webbrowser.open(auth_url)
 
 
 class qb_operations(Invoice, Customer):
 
-
+	@staticmethod
 	def get_id(inv_num):
 
 		#returns id number using DocNumber aka invoice number ***this is not the inv id***
 		#when using filter method, you are always returned a list
 
-		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
+		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
 		for inv in responce:
 			json_data = inv.to_json()
 			inv_dict = json.loads(json_data)
@@ -41,23 +75,23 @@ class qb_operations(Invoice, Customer):
 
 	@staticmethod
 	def dwnld_pdf(inv_id,temp_path):
-	#Downloads a Pdf of invoice. This takes invoice id and file a temporary file path as arguments
+	#Downloads a Pdf of invoice. This takes invoice id and a temporary file path as arguments
 
 		invoice = Invoice()
 		invoice.Id = inv_id
-		responce = invoice.download_pdf(qb=client)
+		responce = invoice.download_pdf(qb=client())
 		# return responce
 		inv_pdf_path = temp_path+'\\'+str(inv_id)+'temp'+'.pdf'
 		with open(inv_pdf_path, 'wb')as file:
 			file.write(responce)
 		return inv_pdf_path
 
-
+	@staticmethod
 	def get_all_customers():
 	#This will return a list of dictionarys with all customer data
 
 		json_cust = []
-		responce = Customer.all(qb=client)
+		responce = Customer.all(qb=client())
 		for customer in responce:
 			try:
 				json_data = customer.to_json()
@@ -67,15 +101,18 @@ class qb_operations(Invoice, Customer):
 				pass
 		return json_cust
 
+	@staticmethod
 	def get_customer_email(inv_num):
-		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
+		#This will return the customers email as a string
+
+		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
 		for inv in responce:
 			json_data = inv.to_json()
 			inv_dict = json.loads(json_data)
 			inv_id = str(inv_dict["Id"])
 			inv_cust = str(inv_dict["CustomerRef"]["name"])
 		try:	
-			resp = Customer.filter(DisplayName=inv_cust, qb=client)
+			resp = Customer.filter(DisplayName=inv_cust, qb=client())
 			for cust in resp:
 				cust_json_data = cust.to_json()
 				cust_dict = json.loads(cust_json_data)
@@ -91,10 +128,9 @@ class qb_operations(Invoice, Customer):
 			'''I need to create an error handeler class. I'm just having a comment printed to console for now'''
 			print('Inv # provided may not exist')
 
-
-
+	@staticmethod
 	def get_customer_name(inv_num):
-		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
+		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
 		for inv in responce:
 			json_data = inv.to_json()
 			inv_dict = json.loads(json_data)
@@ -102,10 +138,11 @@ class qb_operations(Invoice, Customer):
 
 		return str(inv_cust)
 
+	@staticmethod
 	def get_invoice_details(inv_num):
 		#This will return a Tuple - (Customer Name, Invoice Balance, Invoice Due date, Pay Term)
 
-		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client)
+		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
 		for inv in responce:
 			json_data = inv.to_json()
 			inv_dict = json.loads(json_data)

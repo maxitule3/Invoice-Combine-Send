@@ -3,23 +3,30 @@ import os
 import shutil
 import sys
 import sqlite3
-from AppServices import Customer
 import time
+import AppServices
+import webbrowser
+import threading
+import server
+import QBservices
+
+from AppServices import Customer
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore
 from PyPDF2 import PdfFileMerger
 from QBservices import qb_operations
+
 from datetime import datetime
-import AppServices
-import webbrowser
+
+
 
 class MainWindow(QMainWindow):
 	def __init__(self):
 		super(MainWindow,self).__init__()
-		loadUi('QBICST.ui',self)
-
+		loadUi('Main.ui',self)
+		
 		self.CombineInputButton.clicked.connect(self.setInputFolderCombine)
 		self.CombineOutputButton.clicked.connect(self.setOutputFolderCombine)
 		self.toolButton_4.clicked.connect(self.setInputFolderSender)
@@ -31,6 +38,7 @@ class MainWindow(QMainWindow):
 		self.pushButton_2.clicked.connect(self.refresh_sender_list)
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
+		self.pushButton_7.clicked.connect(self.start_authorization)
 
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
@@ -45,6 +53,13 @@ class MainWindow(QMainWindow):
 		dt_string = current_time.strftime('%H:%M:%S')
 		self.textEdit_3.append(f'[{dt_string}] : {message}\n \n')
 		self.textEdit_2.append(f'[{dt_string}] : {message}\n \n')
+
+	def start_authorization(self):
+		srv_thread = threading.Thread(target=server.start_srv, daemon=True)
+		srv_thread.start()
+		time.sleep(3)
+		QBservices.authorize()
+
 
 	def updateCombinerCount(self):
 		numberOfItems = self.listWidget.count()
@@ -245,5 +260,6 @@ widget = QtWidgets.QStackedWidget()
 statusbar = QtWidgets.QStatusBar()
 widget.addWidget(mainwindow)
 widget.setFixedSize(501,590)
+widget.setWindowTitle('PDF Combine-Send')
 widget.show()
 sys.exit(app.exec_())

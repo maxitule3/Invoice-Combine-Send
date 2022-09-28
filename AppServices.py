@@ -1,6 +1,8 @@
 import os
 import win32com.client as win32
 import sqlite3
+from datetime import datetime, timedelta, date
+
 
 class emailer():
 
@@ -56,46 +58,41 @@ The complete version has been provided as an attachment to this email
 
 class Customer():
 
-    customers = []
+	customers = []
 
-    def __init__(self, name, email, prt):
-        self.name = name
-        self.email = email
-        self.prt = prt
+	def __init__(self, name, email, prt):
+		self.name = name
+		self.email = email
+		self.prt = prt
+	
+	def new(name, email, prt):
+		cust = Customer(name, email, prt)
+		Customer.customers.append(cust)
 
-    def new(name, email, prt):
-        cust = Customer(name, email, prt)
-        Customer.customers.append(cust)
+	def update_prt(name, prt):
 
-    def update_prt(name, prt):
-
-        for i in Customer.customers:
-            if i.name == name:
-                i.prt = prt
+		for i in Customer.customers:
+			if i.name == name:
+				i.prt = prt
 
 
 class db_operations():
 
+	#Returns Boolan value depending on if db file exist
 	def db_exists():
 		result = os.path.exists('appdata.db')
 		return(result)
 
-	def update_token(new_token):
+	#Updates all rows in specified column/table
+	def update_value(table, column, new_value):
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
 
-		c.execute("UPDATE qbauth SET token=:token", {'token': new_token})
+		c.execute(f"UPDATE {table} SET {column}=:value", {'value': new_value})
 		conn.commit()
 		conn.close()
 
-	def update_refresh(new_token):
-		conn = sqlite3.connect('appdata.db')
-		c = conn.cursor()
-
-		c.execute("UPDATE qbauth SET refresh_token=:token", {'token': new_token})
-		conn.commit()
-		conn.close()
-		
+	#Checks if specified customer exists and returns Boolian value
 	def customer_exists(customer_name):
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
@@ -108,54 +105,73 @@ class db_operations():
 		else:
 			conn.close()
 			return True
-	
-	def get_code():
+
+	#gets value from first row in the - Takes colum as argument
+	def get_oauth(column):
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
 
-		c.execute("SELECT code FROM qbauth")
+		c.execute(f"SELECT {column} FROM qbauth")
 		responce = c.fetchone()[0]
 		conn.commit()
 		conn.close()
 		return(responce)
 
-	def get_state():
+	#Updates all rows in specified column/table
+	def update_value(table, column, new_value):
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
 
-		c.execute("SELECT state FROM qbauth")
-		responce = c.fetchone()[0]
+		c.execute(f"UPDATE {table} SET {column}=:value", {'value': new_value})
 		conn.commit()
 		conn.close()
-		return(responce)
 
-	def get_realmId():
+	#stores current date + 100 days as a string
+	def update_refresh_date():
+		date_plus100 = datetime.now() + timedelta(days=100)
+		date_string = date_plus100.strftime("%Y-%m-%d")
+
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
 
-		c.execute("SELECT realm FROM qbauth")
+		c.execute("UPDATE qbauth SET next_generate=:date", {'date': date_string})
+		conn.commit()
+		conn.close()
+
+	def get_next_generate():
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+		c.execute("SELECT next_generate FROM qbauth")
 		responce = c.fetchone()[0]
 		conn.commit()
 		conn.close()
-		return(responce)
 
-	def get_token():
+		date_time_obj = datetime.strptime(responce, "%Y-%m-%d").date()
+		return(date_time_obj)
+
+	def update_token_expire():
+		token_time_plus60 = datetime.now() + timedelta(minutes=60)
+		datetime_string = token_time_plus60.strftime("%Y-%m-%d %H:%M:%S")
+
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
 
-		c.execute("SELECT token FROM qbauth")
-		responce = c.fetchone()[0]
+		c.execute("UPDATE qbauth SET next_token=:time", {'time': datetime_string})
 		conn.commit()
 		conn.close()
-		return(responce)
 
-	def get_refresh():
+	def check_token_expire():
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
-
-		c.execute("SELECT refresh_token FROM qbauth")
+		c.execute("SELECT next_token FROM qbauth")
 		responce = c.fetchone()[0]
 		conn.commit()
 		conn.close()
-		return(responce)
 
+		date_time_obj = datetime.strptime(responce, "%Y-%m-%d %H:%M:%S")
+
+		if datetime.now() < date_time_obj:
+			return False
+
+		else:
+			return True

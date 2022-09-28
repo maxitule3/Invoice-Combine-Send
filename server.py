@@ -3,9 +3,9 @@ import os
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 import sqlite3
-
-
-
+from AppServices import db_operations as db
+import time
+import QBservices
 
 class Serv(BaseHTTPRequestHandler):
 
@@ -20,7 +20,6 @@ class Serv(BaseHTTPRequestHandler):
             params_url = self.path
             parsed_url = urlparse(params_url)
 
-
             try:
                 captured_code = parse_qs(parsed_url.query)['code'][0]
                 captured_state = parse_qs(parsed_url.query)['state'][0]
@@ -31,22 +30,19 @@ class Serv(BaseHTTPRequestHandler):
                 
                 c.execute("UPDATE qbauth SET code=:code", {'code': captured_code})
                 conn.commit()
-
                 c.execute("UPDATE qbauth SET state=:state", {'state': captured_state})
                 conn.commit()
-
                 c.execute("UPDATE qbauth SET realm=:realm", {'realm': captured_realmid})
                 conn.commit()
                 conn.close()
 
+                db.update_refresh_date()
+                time.sleep(2)
+
+                QBservices.auth_test()
+
             except:
-                print('One or more of the URL params doesn\'t exist')
-
-
-
-
-        # with open("params.pickle", "wb") as f:
-        #     pickle.dump(parsed_url, f)
+                print('Error getting parameters from url or commiting values to DataBase')
 
 httpd = HTTPServer(('localhost', 8000), Serv)
 
