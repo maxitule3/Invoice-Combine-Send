@@ -6,7 +6,7 @@ Once you connect your Quickbooks account, you can choose to print a specified cu
 
 This app Requires
   - Windows 10 or above
-  - Microsoft Outlook installed and signed into
+  - Microsoft Outlook
 
 
 # Instructions
