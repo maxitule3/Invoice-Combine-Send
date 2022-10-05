@@ -8,10 +8,12 @@ import json
 from quickbooks import QuickBooks
 from quickbooks.objects import Account, Attachable, Invoice, Customer
 from AppServices import db_operations as db
+from datetime import datetime, timedelta
+import sqlite3
 
 
 intuit_oauth = AuthClient(
-	client_id='AB1Q6F1f7BWpIdLcEaTIW3UIXdyigjCeaSLQ5seIEt6eIxD5i7',
+	client_id='ABkSClwUVd3tfq4oqKQF2FWcgjvL8BXxrwl3cvRqYESLbs0O6y',
 	client_secret=db.get_oauth('app_key'),
 	access_token=db.get_oauth('token'),
 	environment='sandbox',
@@ -58,10 +60,33 @@ def authorize():
     auth_url = intuit_oauth.get_authorization_url([Scopes.ACCOUNTING])
     webbrowser.open(auth_url)
 
+def check_token():
+	conn = sqlite3.connect('appdata.db')
+	c = conn.cursor()
+
+	c.execute("SELECT next_token, next_generate FROM qbauth")
+	responce = c.fetchone()
+
+	date_time_obj = datetime.strptime(responce[0], "%Y-%m-%d %H:%M:%S")
+
+	#if True, Then a new token is required
+	if date_time_obj < datetime.now():
+		try:
+			intuit_oauth.refresh(refresh_token=db.get_oauth('refresh_token'))
+			db.update_token_expire()
+			db.update_value('qbauth', 'next_token', intuit_oauth.access_token)
+
+		except:
+			print('Failed getting new access token')
+	else:
+		pass
+
+
+
 
 class qb_operations(Invoice, Customer):
 
-	@staticmethod
+
 	def get_id(inv_num):
 
 		#returns id number using DocNumber aka invoice number ***this is not the inv id***
@@ -73,8 +98,9 @@ class qb_operations(Invoice, Customer):
 			inv_dict = json.loads(json_data)
 			return str(inv_dict["Id"])
 
-	@staticmethod
+
 	def dwnld_pdf(inv_id,temp_path):
+
 	#Downloads a Pdf of invoice. This takes invoice id and a temporary file path as arguments
 
 		invoice = Invoice()
@@ -86,8 +112,9 @@ class qb_operations(Invoice, Customer):
 			file.write(responce)
 		return inv_pdf_path
 
-	@staticmethod
+
 	def get_all_customers():
+
 	#This will return a list of dictionarys with all customer data
 
 		json_cust = []
@@ -101,8 +128,9 @@ class qb_operations(Invoice, Customer):
 				pass
 		return json_cust
 
-	@staticmethod
+
 	def get_customer_email(inv_num):
+
 		#This will return the customers email as a string
 
 		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
@@ -128,8 +156,9 @@ class qb_operations(Invoice, Customer):
 			'''I need to create an error handeler class. I'm just having a comment printed to console for now'''
 			print('Inv # provided may not exist')
 
-	@staticmethod
+
 	def get_customer_name(inv_num):
+
 		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())
 		for inv in responce:
 			json_data = inv.to_json()
@@ -138,8 +167,9 @@ class qb_operations(Invoice, Customer):
 
 		return str(inv_cust)
 
-	@staticmethod
+
 	def get_invoice_details(inv_num):
+
 		#This will return a Tuple - (Customer Name, Invoice Balance, Invoice Due date, Pay Term)
 
 		responce = Invoice.filter(DocNumber=f'{inv_num}', qb=client())

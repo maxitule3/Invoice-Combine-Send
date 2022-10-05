@@ -92,7 +92,7 @@ class db_operations():
 		conn.commit()
 		conn.close()
 
-	#Checks if specified customer exists and returns Boolian value
+	#Checks if specified customer exists and returns Boolian value - NOT USED
 	def customer_exists(customer_name):
 		conn = sqlite3.connect('appdata.db')
 		c = conn.cursor()
@@ -159,19 +159,3 @@ class db_operations():
 		c.execute("UPDATE qbauth SET next_token=:time", {'time': datetime_string})
 		conn.commit()
 		conn.close()
-
-	def check_token_expire():
-		conn = sqlite3.connect('appdata.db')
-		c = conn.cursor()
-		c.execute("SELECT next_token FROM qbauth")
-		responce = c.fetchone()[0]
-		conn.commit()
-		conn.close()
-
-		date_time_obj = datetime.strptime(responce, "%Y-%m-%d %H:%M:%S")
-
-		if datetime.now() < date_time_obj:
-			return False
-
-		else:
-			return True

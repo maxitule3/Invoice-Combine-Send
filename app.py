@@ -1,8 +1,5 @@
-
 import os
-import shutil
 import sys
-import sqlite3
 import time
 import AppServices
 import webbrowser
@@ -120,6 +117,7 @@ class MainWindow(QMainWindow):
 			self.console_log('Nothing selected from Send list')
 
 		else:
+			QBservices.check_token()
 			output_path = self.lineEdit_4.text()
 			item = self.listWidget_2.currentItem()
 			item_name = item.text()
@@ -149,14 +147,12 @@ class MainWindow(QMainWindow):
 
 								email_custom = self.textEdit.toHtml()
 								AppServices.emailer.create_email(i.email, f'Invoice {inv}', inv_path, email_custom)
-
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
 
 							else:
 								AppServices.emailer.create_invoice_email(i.email, f'Invoice {inv}', inv_path, inv, inv_date, inv_terms, inv_balance)
-
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
@@ -169,23 +165,17 @@ class MainWindow(QMainWindow):
 			self.console_log('Nothing selected from Combine list')
 
 		else:
+			QBservices.check_token()
 
-			output_path = self.lineEdit_2.text()
-			item = self.listWidget.currentItem()
-			itemText = item.text()
-			in_path = (self.lineEdit.text() + '\\' +itemText)
-			pod_path = in_path.replace('/', '\\')
 			try:
 
 				invId = qb_operations.get_id(itemText[0:5])
 				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
-
 				merger = PdfFileMerger()
 				merger.append(pod_path)
 				merger.merge(0, inv_pdf)
 				merger.write(output_path + '\\' + itemText)
 				merger.close()
-
 				os.remove(inv_pdf)
 				os.remove(pod_path)
 
@@ -201,13 +191,12 @@ class MainWindow(QMainWindow):
 				self.console_log('error')	
 
 	def refresh_customer_list(self):
-
+		QBservices.check_token()
 		self.listWidget_3.clear()
 		Customer.customers.clear()
 		current_time = datetime.now()
 		dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
 		self.label_13.setText(dt_string)
-
 		cust_dict = qb_operations.get_all_customers()
 
 		for cust in cust_dict:
