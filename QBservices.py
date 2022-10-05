@@ -13,11 +13,11 @@ import sqlite3
 
 
 intuit_oauth = AuthClient(
-	client_id='ABkSClwUVd3tfq4oqKQF2FWcgjvL8BXxrwl3cvRqYESLbs0O6y',
+	client_id='ABDv92UgFiyYHsfcoWme4xmF267A57czAhZNdHWV0kqQfJK2XY',
 	client_secret=db.get_oauth('app_key'),
 	access_token=db.get_oauth('token'),
-	environment='sandbox',
-	redirect_uri='http://localhost:8000/',
+	environment='production',
+	redirect_uri='https://example.com/',
 	)
 
 def client():
@@ -31,7 +31,7 @@ def client():
 
 
 def auth_test():
-
+    db.update_refresh_date()
     state = db.get_oauth('state')
     auth_code = db.get_oauth('code')
     realm_id = db.get_oauth('realm')

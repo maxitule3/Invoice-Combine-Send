@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
 		self.pushButton_7.clicked.connect(self.start_authorization)
+		self.pushButton_9.clicked.connect(self.get_access_token)
 
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
@@ -52,11 +53,13 @@ class MainWindow(QMainWindow):
 		self.textEdit_2.append(f'[{dt_string}] : {message}\n \n')
 
 	def start_authorization(self):
-		srv_thread = threading.Thread(target=server.start_srv, daemon=True)
-		srv_thread.start()
-		time.sleep(3)
+		# srv_thread = threading.Thread(target=server.start_srv, daemon=True)
+		# srv_thread.start()
+		# time.sleep(3)
 		QBservices.authorize()
 
+	def get_access_token(self):
+		QBservices.auth_test()
 
 	def updateCombinerCount(self):
 		numberOfItems = self.listWidget.count()
@@ -117,7 +120,7 @@ class MainWindow(QMainWindow):
 			self.console_log('Nothing selected from Send list')
 
 		else:
-			QBservices.check_token()
+			
 			output_path = self.lineEdit_4.text()
 			item = self.listWidget_2.currentItem()
 			item_name = item.text()
@@ -165,17 +168,23 @@ class MainWindow(QMainWindow):
 			self.console_log('Nothing selected from Combine list')
 
 		else:
-			QBservices.check_token()
 
+			output_path = self.lineEdit_2.text()
+			item = self.listWidget.currentItem()
+			itemText = item.text()
+			in_path = (self.lineEdit.text() + '\\' +itemText)
+			pod_path = in_path.replace('/', '\\')
 			try:
 
 				invId = qb_operations.get_id(itemText[0:5])
 				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
+
 				merger = PdfFileMerger()
 				merger.append(pod_path)
 				merger.merge(0, inv_pdf)
 				merger.write(output_path + '\\' + itemText)
 				merger.close()
+
 				os.remove(inv_pdf)
 				os.remove(pod_path)
 
@@ -188,10 +197,10 @@ class MainWindow(QMainWindow):
 				self.label_16.setText(str(numberOfItems))
 
 			except:
-				self.console_log('error')	
+				print('error')	
 
 	def refresh_customer_list(self):
-		QBservices.check_token()
+		
 		self.listWidget_3.clear()
 		Customer.customers.clear()
 		current_time = datetime.now()

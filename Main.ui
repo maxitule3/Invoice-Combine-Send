@@ -462,7 +462,7 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>20</x>
         <y>40</y>
-        <width>151</width>
+        <width>121</width>
         <height>23</height>
        </rect>
       </property>
@@ -586,6 +586,32 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="text">
        <string>Use Custom Body</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_9">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>40</y>
+        <width>121</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Get Acess Token</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_10">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>40</y>
+        <width>121</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Revoke</string>
       </property>
      </widget>
     </widget>
