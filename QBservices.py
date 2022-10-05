@@ -118,7 +118,7 @@ class qb_operations(Invoice, Customer):
 	#This will return a list of dictionarys with all customer data
 
 		json_cust = []
-		responce = Customer.all(qb=client())
+		responce = Customer.all(max_results=1000, qb=client())
 		for customer in responce:
 			try:
 				json_data = customer.to_json()

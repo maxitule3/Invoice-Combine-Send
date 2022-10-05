@@ -129,6 +129,7 @@ class MainWindow(QMainWindow):
 			output = (output_path + '\\' + item_name)
 
 			try:
+				QBservices.check_token()
 				inv = item_name[0:5]
 				inv_tuple = qb_operations.get_invoice_details(inv)
 				inv_terms = inv_tuple[3]
@@ -175,7 +176,7 @@ class MainWindow(QMainWindow):
 			in_path = (self.lineEdit.text() + '\\' +itemText)
 			pod_path = in_path.replace('/', '\\')
 			try:
-
+				QBservices.check_token()
 				invId = qb_operations.get_id(itemText[0:5])
 				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
 
@@ -201,6 +202,7 @@ class MainWindow(QMainWindow):
 
 	def refresh_customer_list(self):
 		
+		QBservices.check_token()
 		self.listWidget_3.clear()
 		Customer.customers.clear()
 		current_time = datetime.now()
