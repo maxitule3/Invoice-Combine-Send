@@ -64,23 +64,22 @@ def check_token():
 	conn = sqlite3.connect('appdata.db')
 	c = conn.cursor()
 
-	c.execute("SELECT next_token, next_generate FROM qbauth")
+	c.execute("SELECT next_token FROM qbauth")
 	responce = c.fetchone()
-
 	date_time_obj = datetime.strptime(responce[0], "%Y-%m-%d %H:%M:%S")
+	
 
 	#if True, Then a new token is required
 	if date_time_obj < datetime.now():
 		try:
 			intuit_oauth.refresh(refresh_token=db.get_oauth('refresh_token'))
 			db.update_token_expire()
-			db.update_value('qbauth', 'next_token', intuit_oauth.access_token)
+			db.update_value('qbauth', 'token', intuit_oauth.access_token)
 
 		except:
 			print('Failed getting new access token')
 	else:
 		pass
-
 
 
 
@@ -163,8 +162,8 @@ class qb_operations(Invoice, Customer):
 		for inv in responce:
 			json_data = inv.to_json()
 			inv_dict = json.loads(json_data)
-			inv_cust = str(inv_dict["CustomerRef"]["name"])
-
+#			inv_cust = str(inv_dict["CustomerRef"]["name"])
+			inv_cust = str(inv_dict)
 		return str(inv_cust)
 
 
@@ -180,6 +179,9 @@ class qb_operations(Invoice, Customer):
 			inv_amount = (inv_dict["Balance"])
 			inv_due = (inv_dict["DueDate"])
 			inv_term = (inv_dict["SalesTermRef"]["name"])
+			customer_ref = (inv_dict["CustomField"][0]["StringValue"])
 
-		return inv_cust, inv_amount, inv_due, inv_term
-		
+		return inv_cust, inv_amount, inv_due, inv_term, customer_ref
+
+
+print(qb_operations.get_invoice_details('23752'))

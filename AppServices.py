@@ -1,3 +1,4 @@
+from inspect import signature
 import os
 import win32com.client as win32
 import sqlite3
@@ -16,6 +17,7 @@ class emailer():
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (email_body)
 		mail_item.To = to
+		
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
 
@@ -45,15 +47,19 @@ The complete version has been provided as an attachment to this email
 </html>
 """.format(**locals())
 
+
 		olApp = win32.Dispatch('Outlook.Application')
 		olNS = olApp.GetNameSpace('MAPI')
 		mail_item = olApp.CreateItem(0)
+		signature = mail_item.body
 		mail_item.Subject = subject
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (html_inv)
 		mail_item.To = to
+		mail_item.CC = 'accounting@wisetrucklines.com'
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
+
 
 
 class Customer():

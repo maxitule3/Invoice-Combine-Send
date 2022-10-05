@@ -136,6 +136,7 @@ class MainWindow(QMainWindow):
 				inv_balance = inv_tuple[1]
 				inv_date = inv_tuple[2]
 				customer_name = inv_tuple[0]
+				customer_ref = inv_tuple[4]
 			
 				for i in Customer.customers:
 					if i.name == customer_name:
@@ -150,13 +151,13 @@ class MainWindow(QMainWindow):
 							if self.checkBox.checkState() == 2:
 
 								email_custom = self.textEdit.toHtml()
-								AppServices.emailer.create_email(i.email, f'Invoice {inv}', inv_path, email_custom)
+								AppServices.emailer.create_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, email_custom)
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
 
 							else:
-								AppServices.emailer.create_invoice_email(i.email, f'Invoice {inv}', inv_path, inv, inv_date, inv_terms, inv_balance)
+								AppServices.emailer.create_invoice_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, inv, inv_date, inv_terms, inv_balance)
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
