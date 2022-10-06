@@ -182,6 +182,3 @@ class qb_operations(Invoice, Customer):
 			customer_ref = (inv_dict["CustomField"][0]["StringValue"])
 
 		return inv_cust, inv_amount, inv_due, inv_term, customer_ref
-
-
-print(qb_operations.get_invoice_details('23752'))

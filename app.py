@@ -4,7 +4,6 @@ import time
 import AppServices
 import webbrowser
 import threading
-import server
 import QBservices
 
 from AppServices import Customer
@@ -74,7 +73,7 @@ class MainWindow(QMainWindow):
 		else:
 			i = self.lineEdit.text()
 			folderPath = i.replace('/','\\\\')
-			fileNames = os.listdir(folderPath)
+			fileNames = os.listdir(i)
 			pdf_files = []
 			for fileName in fileNames:
 				if fileName.endswith('.pdf'):
@@ -109,6 +108,7 @@ class MainWindow(QMainWindow):
 
 			items_count = self.listWidget_2.count()
 			self.label_17.setText(str(items_count))
+			self.console_log('Sender list refreshed!')
 
 	def combineAll(self):
 		allItems = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
@@ -161,6 +161,10 @@ class MainWindow(QMainWindow):
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
+								webbrowser.open(inv_path)
+								
+				items_count = self.listWidget_2.count()
+				self.label_17.setText(str(items_count))
 
 			except:
 				self.console_log('Error with Quickbooks API call - Invoice number may not exist in QuickBooks')

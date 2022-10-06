@@ -16,7 +16,7 @@ class emailer():
 		mail_item.Subject = subject
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (email_body)
-		mail_item.To = to
+		mail_item.To = to.replace(',',';')
 		
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
@@ -31,7 +31,7 @@ class emailer():
 <tbody>
 <tr>
 <td style="padding:15.0pt 15.0pt 15.0pt 15.0pt">
-<p><span style="font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif">--------------------------Invoice--Summary--------------------------<span style="color:black"><br>
+<p><span style="font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif">------------------------ Invoice Summary ------------------------<span style="color:black"><br>
 Invoice# : <b>{invoice_numb}</b><br>
 Invoice Due Date : <b>{invoice_due_date}</b><br>
 Terms : <b>{invoice_term}</b><br>
@@ -55,7 +55,7 @@ The complete version has been provided as an attachment to this email
 		mail_item.Subject = subject
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (html_inv)
-		mail_item.To = to
+		mail_item.To = to.replace(',',';')
 		mail_item.CC = 'accounting@wisetrucklines.com'
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
