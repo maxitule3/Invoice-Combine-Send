@@ -38,6 +38,10 @@ class MainWindow(QMainWindow):
 		self.pushButton_7.clicked.connect(self.start_authorization)
 		self.pushButton_9.clicked.connect(self.get_access_token)
 		self.pushButton_11.clicked.connect(self.save_settings)
+		self.pushButton_10.clicked.connect(self.revoke_all_tokens)
+
+	def revoke_all_tokens(self):
+		self.console_log(str(QBservices.revoke_token()))
 
 	def load_settings(self):
 

@@ -81,7 +81,27 @@ def check_token():
 	else:
 		pass
 
+def revoke_token():
+	intuit_oauth.revoke()
 
+	conn = sqlite3.connect('appdata.db')
+	c = conn.cursor()
+
+	c.execute("UPDATE qbauth SET next_generate=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET code=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET state=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET realm=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET next_token=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET token=NULL")
+	conn.commit()
+	c.execute("UPDATE qbauth SET refresh_token=NULL")
+	conn.commit()
+	conn.close()
 
 class qb_operations(Invoice, Customer):
 
