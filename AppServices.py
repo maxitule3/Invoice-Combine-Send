@@ -21,7 +21,7 @@ class emailer():
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
 
-	def create_invoice_email(to, subject, attachment_path, invoice_numb, invoice_due_date, invoice_term, invoice_amount):
+	def create_invoice_email(to, subject, attachment_path, invoice_numb, invoice_due_date, invoice_term, invoice_amount, cc_email):
 	#creates a table in email body containing invoice details
 		html_inv = """\
 <html>
@@ -56,7 +56,7 @@ The complete version has been provided as an attachment to this email
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (html_inv)
 		mail_item.To = to.replace(',',';')
-		mail_item.CC = 'accounting@wisetrucklines.com'
+		mail_item.CC = cc_email.replace(',',';')
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
 

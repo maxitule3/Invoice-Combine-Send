@@ -5,6 +5,7 @@ import AppServices
 import webbrowser
 import threading
 import QBservices
+import sqlite3
 
 from AppServices import Customer
 from PyQt5 import QtWidgets
@@ -22,7 +23,7 @@ class MainWindow(QMainWindow):
 	def __init__(self):
 		super(MainWindow,self).__init__()
 		loadUi('Main.ui',self)
-		
+	
 		self.CombineInputButton.clicked.connect(self.setInputFolderCombine)
 		self.CombineOutputButton.clicked.connect(self.setOutputFolderCombine)
 		self.toolButton_4.clicked.connect(self.setInputFolderSender)
@@ -36,6 +37,48 @@ class MainWindow(QMainWindow):
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
 		self.pushButton_7.clicked.connect(self.start_authorization)
 		self.pushButton_9.clicked.connect(self.get_access_token)
+		self.pushButton_11.clicked.connect(self.save_settings)
+
+	def load_settings(self):
+
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+		c.execute("SELECT * FROM userpref")
+		responce = c.fetchone()
+
+		self.lineEdit_5.setText(responce[0])
+		self.spinBox.setValue(responce[1])
+		self.lineEdit_3.setText(responce[4])
+		self.lineEdit_4.setText(responce[5])
+		self.lineEdit.setText(responce[2])
+		self.lineEdit_2.setText(responce[3])
+
+
+	def save_settings(self):
+		cc_value = self.lineEdit_5.text()
+		inv_char_amount = self.spinBox.value()
+		sender_in = self.lineEdit_3.text()
+		sender_out = self.lineEdit_4.text()
+		combiner_in = self.lineEdit.text()
+		combiner_out = self.lineEdit_2.text()
+
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+		c.execute("UPDATE userpref SET cc_email=:value", {'value': cc_value})
+		conn.commit()
+		c.execute("UPDATE userpref SET inv_spinbox=:value", {'value': inv_char_amount})
+		conn.commit()
+		c.execute("UPDATE userpref SET combine_in=:value", {'value': combiner_in})
+		conn.commit()
+		c.execute("UPDATE userpref SET combine_out=:value", {'value': combiner_out})
+		conn.commit()
+		c.execute("UPDATE userpref SET send_in=:value", {'value': sender_in})
+		conn.commit()
+		c.execute("UPDATE userpref SET send_out=:value", {'value': sender_out})
+		conn.commit()
+		conn.close()
+		self.console_log('Settings saved!')
+
 
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
@@ -120,7 +163,7 @@ class MainWindow(QMainWindow):
 			self.console_log('Nothing selected from Send list')
 
 		else:
-			
+			selected_num = self.spinBox.value()
 			output_path = self.lineEdit_4.text()
 			item = self.listWidget_2.currentItem()
 			item_name = item.text()
@@ -130,13 +173,14 @@ class MainWindow(QMainWindow):
 
 			try:
 				QBservices.check_token()
-				inv = item_name[0:5]
+				inv = item_name[0:selected_num]
 				inv_tuple = qb_operations.get_invoice_details(inv)
 				inv_terms = inv_tuple[3]
 				inv_balance = inv_tuple[1]
 				inv_date = inv_tuple[2]
 				customer_name = inv_tuple[0]
 				customer_ref = inv_tuple[4]
+				cc_string = self.lineEdit_5.text()
 			
 				for i in Customer.customers:
 					if i.name == customer_name:
@@ -151,17 +195,26 @@ class MainWindow(QMainWindow):
 							if self.checkBox.checkState() == 2:
 
 								email_custom = self.textEdit.toHtml()
-								AppServices.emailer.create_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, email_custom)
+								AppServices.emailer.create_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, email_custom, cc_string)
+								sent_item = self.listWidget_2.currentRow()
+								self.listWidget_2.takeItem(sent_item)
+								self.console_log(f'{inv} was sent!')
+								
+								if self.checkBox_2.checkState() == 2:
+									webbrowser.open(inv_path)
+								else:
+									pass
+
+							else:
+								AppServices.emailer.create_invoice_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, inv, inv_date, inv_terms, inv_balance, cc_string)
 								sent_item = self.listWidget_2.currentRow()
 								self.listWidget_2.takeItem(sent_item)
 								self.console_log(f'{inv} was sent!')
 
-							else:
-								AppServices.emailer.create_invoice_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, inv, inv_date, inv_terms, inv_balance)
-								sent_item = self.listWidget_2.currentRow()
-								self.listWidget_2.takeItem(sent_item)
-								self.console_log(f'{inv} was sent!')
-								webbrowser.open(inv_path)
+								if self.checkBox_2.checkState() == 2:
+									webbrowser.open(inv_path)
+								else:
+									pass
 								
 				items_count = self.listWidget_2.count()
 				self.label_17.setText(str(items_count))
@@ -180,9 +233,10 @@ class MainWindow(QMainWindow):
 			itemText = item.text()
 			in_path = (self.lineEdit.text() + '\\' +itemText)
 			pod_path = in_path.replace('/', '\\')
+			selected_num = self.spinBox.value()
 			try:
 				QBservices.check_token()
-				invId = qb_operations.get_id(itemText[0:5])
+				invId = qb_operations.get_id(itemText[0:selected_num])
 				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
 
 				merger = PdfFileMerger()
@@ -203,7 +257,7 @@ class MainWindow(QMainWindow):
 				self.label_16.setText(str(numberOfItems))
 
 			except:
-				print('error')	
+				self.console_log('Error Combining! - Invoice number may not exist in Quickbooks')	
 
 	def refresh_customer_list(self):
 		
@@ -267,4 +321,5 @@ widget.addWidget(mainwindow)
 widget.setFixedSize(501,590)
 widget.setWindowTitle('PDF Combine-Send')
 widget.show()
+mainwindow.load_settings()
 sys.exit(app.exec_())
