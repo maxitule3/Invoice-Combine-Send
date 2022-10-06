@@ -246,7 +246,7 @@ class MainWindow(QMainWindow):
 				merger = PdfFileMerger()
 				merger.append(pod_path)
 				merger.merge(0, inv_pdf)
-				merger.write(output_path + '\\' + itemText)
+				merger.write(output_path + '\\' + itemText[:-4] + ' -C' + '.pdf')
 				merger.close()
 
 				os.remove(inv_pdf)

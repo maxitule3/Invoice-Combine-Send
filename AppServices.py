@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, date
 
 class emailer():
 
-	def create_email(to, subject, attachment_path, email_body):
+	def create_email(to, subject, attachment_path, email_body, cc_email):
 	#email body is required to formated in HTML
 
 		olApp = win32.Dispatch('Outlook.Application')
@@ -17,6 +17,7 @@ class emailer():
 		mail_item.BodyFormat = 1
 		mail_item.HTMLBody = (email_body)
 		mail_item.To = to.replace(',',';')
+		mail_item.CC = cc_email.replace(',',';')
 		
 		mail_item.Display(False)
 		mail_item.Attachments.Add(attachment_path)
@@ -27,6 +28,7 @@ class emailer():
 <html>
 <head></head>
 <body>
+<br>
 <table border="0" cellspacing="0" cellpadding="0" width="700" style="width:525.0pt;background:#f7f7f7">
 <tbody>
 <tr>
