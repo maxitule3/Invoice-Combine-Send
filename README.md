@@ -1,6 +1,6 @@
 # Invoice-Combine-Send
 
-This PyQt app lets you connect to your Quickbooks Online account and combine Invoice PDFs with PDFs on your local machine. The Purpose of this app is to make invoicing customers that require an invoice along with back-up paperwork faster and eaiser.
+This PyQt app lets you connect to your Quickbooks Online account and combine Invoice PDFs with PDFs on your local machine. The Purpose of this app is to make invoicing customers that require there invoice along with back-up paperwork faster and eaiser.
 
 Once you connect your Quickbooks account, you can choose to print a specified customers invoice instead of emailing them for customers that require a physical copy.
 
