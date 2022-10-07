@@ -31,7 +31,6 @@ def client():
 
 
 def auth_test():
-    db.update_refresh_date()
     state = db.get_oauth('state')
     auth_code = db.get_oauth('code')
     realm_id = db.get_oauth('realm')
@@ -58,7 +57,8 @@ def get_new_token():
 
 def authorize():
     auth_url = intuit_oauth.get_authorization_url([Scopes.ACCOUNTING])
-    webbrowser.open(auth_url)
+    return(auth_url)
+    
 
 def check_token():
 	conn = sqlite3.connect('appdata.db')

@@ -569,7 +569,7 @@ p, li { white-space: pre-wrap; }
        <number>0</number>
       </property>
       <property name="text">
-       <string>Connected</string>
+       <string/>
       </property>
       <property name="textFormat">
        <enum>Qt::AutoText</enum>
@@ -617,7 +617,7 @@ p, li { white-space: pre-wrap; }
        <string>Use Custom Body</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_9">
+     <widget class="QPushButton" name="pushButton_10">
       <property name="geometry">
        <rect>
         <x>130</x>
@@ -627,20 +627,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="text">
-       <string>Get Acess Token</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_10">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>40</y>
-        <width>101</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Revoke</string>
+       <string>Disconnect</string>
       </property>
      </widget>
      <widget class="QSpinBox" name="spinBox">

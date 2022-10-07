@@ -1,21 +1,78 @@
 import os
 import sys
-import time
 import AppServices
 import webbrowser
-import threading
 import QBservices
 import sqlite3
-
 from AppServices import Customer
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidgetItem, QMessageBox, QToolBar, QPushButton
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QUrl
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore
 from PyPDF2 import PdfFileMerger
 from QBservices import qb_operations
-
 from datetime import datetime
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
+
+
+class WebWindow(QMainWindow):
+	def __init__(self):
+		super().__init__()
+
+		self.setWindowTitle('Authenticate')
+		self.setFixedSize(900, 700)
+
+		toolbar = QToolBar()
+		self.addToolBar(toolbar)
+
+		self.doneButton = QPushButton()
+		self.doneButton.setText('Done')
+		self.doneButton.clicked.connect(self.get_url_tokens)
+		toolbar.addWidget(self.doneButton)
+
+		self.web_view = QWebEngineView()
+		self.setCentralWidget(self.web_view)
+		init_url = QBservices.authorize()
+		self.web_view.load(QUrl(init_url))
+
+
+	def get_url_tokens(self):
+		print('DONE')
+		url_string = self.web_view.url().toString()
+		parsed_url = urlparse(url_string)
+
+		try:
+			captured_code = parse_qs(parsed_url.query)['code'][0]
+			captured_state = parse_qs(parsed_url.query)['state'][0]
+			captured_realmid = parse_qs(parsed_url.query)['realmId'][0]
+
+			conn = sqlite3.connect('appdata.db')
+			c = conn.cursor()
+
+			c.execute("UPDATE qbauth SET code=:code", {'code': captured_code})
+			conn.commit()
+			c.execute("UPDATE qbauth SET state=:state", {'state': captured_state})
+			conn.commit()
+			c.execute("UPDATE qbauth SET realm=:realm", {'realm': captured_realmid})
+			conn.commit()
+
+
+			AppServices.db_operations.update_refresh_date()
+			QBservices.auth_test()
+
+			c.execute("UPDATE qbauth SET conn_status=:value", {'value': 'connected'})
+			conn.commit()
+			conn.close()
+
+			mainwindow.label_15.setText('Ready!')
+
+
+		except:
+			print('Error getting parameters from url or commiting values to DataBase')
+
 
 
 
@@ -36,12 +93,36 @@ class MainWindow(QMainWindow):
 		self.pushButton_5.clicked.connect(self.send_selected)
 		self.listWidget_3.itemChanged.connect(self.refresh_prt_state)
 		self.pushButton_7.clicked.connect(self.start_authorization)
-		self.pushButton_9.clicked.connect(self.get_access_token)
 		self.pushButton_11.clicked.connect(self.save_settings)
 		self.pushButton_10.clicked.connect(self.revoke_all_tokens)
 
+	def check_connect_status(self):
+		conn = sqlite3.connect('appdata.db')
+		c = conn.cursor()
+		c.execute("SELECT conn_status FROM qbauth")
+		responce = c.fetchone()[0]
+		if responce == 'connected':
+			self.label_15.setText('Ready!')
+			return(True)
+		else:
+			self.label_15.setText('Not Connected')
+			return(False)
+
 	def revoke_all_tokens(self):
-		self.console_log(str(QBservices.revoke_token()))
+		status = self.check_connect_status()
+
+		if status == False:
+			self.error_window('Already Disconnected', 'This app is not currently linked to a QuickBooks account')
+		elif status == True:
+			self.console_log(str(QBservices.revoke_token()))
+
+			conn = sqlite3.connect('appdata.db')
+			c = conn.cursor()
+			c.execute("UPDATE qbauth SET conn_status=:value", {'value': 'disconnected'})
+			conn.commit()
+			conn.close()
+
+			self.check_connect_status()
 
 	def load_settings(self):
 
@@ -56,7 +137,6 @@ class MainWindow(QMainWindow):
 		self.lineEdit_4.setText(responce[5])
 		self.lineEdit.setText(responce[2])
 		self.lineEdit_2.setText(responce[3])
-
 
 	def save_settings(self):
 		cc_value = self.lineEdit_5.text()
@@ -83,7 +163,6 @@ class MainWindow(QMainWindow):
 		conn.close()
 		self.console_log('Settings saved!')
 
-
 	def error_window(self, title, message):
 			msgBox = QMessageBox()
 			msgBox.setIcon(QMessageBox.Information)
@@ -98,14 +177,14 @@ class MainWindow(QMainWindow):
 		self.textEdit_3.append(f'[{dt_string}] : {message}\n \n')
 		self.textEdit_2.append(f'[{dt_string}] : {message}\n \n')
 
-	def start_authorization(self):
-		# srv_thread = threading.Thread(target=server.start_srv, daemon=True)
-		# srv_thread.start()
-		# time.sleep(3)
-		QBservices.authorize()
+	def start_authorization(self, checked):
+		status = self.check_connect_status()
 
-	def get_access_token(self):
-		QBservices.auth_test()
+		if status == True:
+			self.error_window('Already Connected', 'This app is already linked to a QuickBooks account. If you need to link a different account, click \'Disconnect\' and try again.')
+		else:
+			self.web = WebWindow()
+			self.web.show()
 
 	def updateCombinerCount(self):
 		numberOfItems = self.listWidget.count()
@@ -163,131 +242,144 @@ class MainWindow(QMainWindow):
 			print(item[0:5])
 
 	def send_selected(self):
-		if self.listWidget_2.currentItem() == None:
-			self.console_log('Nothing selected from Send list')
+		status = self.check_connect_status()
+		if status == True:
+			if self.listWidget_2.currentItem() == None:
+				self.console_log('Nothing selected from Send list')
 
+			else:
+				selected_num = self.spinBox.value()
+				output_path = self.lineEdit_4.text()
+				item = self.listWidget_2.currentItem()
+				item_name = item.text()
+				i = (self.lineEdit_3.text() + '\\' + item_name)
+				inv_path = i.replace('/','\\')
+				output = (output_path + '\\' + item_name)
+
+				try:
+					QBservices.check_token()
+					inv = item_name[0:selected_num]
+					inv_tuple = qb_operations.get_invoice_details(inv)
+					inv_terms = inv_tuple[3]
+					inv_balance = inv_tuple[1]
+					inv_date = inv_tuple[2]
+					customer_name = inv_tuple[0]
+					customer_ref = inv_tuple[4]
+					cc_string = self.lineEdit_5.text()
+				
+					for i in Customer.customers:
+						if i.name == customer_name:
+							if i.prt == True:
+
+								webbrowser.open(inv_path)
+								sent_item = self.listWidget_2.currentRow()
+								self.listWidget_2.takeItem(sent_item)
+								self.console_log(f'{inv} was printed!')
+
+							elif i.prt == False:
+								if self.checkBox.checkState() == 2:
+
+									email_custom = self.textEdit.toHtml()
+									AppServices.emailer.create_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, email_custom, cc_string)
+									sent_item = self.listWidget_2.currentRow()
+									self.listWidget_2.takeItem(sent_item)
+									self.console_log(f'{inv} was sent!')
+									
+									if self.checkBox_2.checkState() == 2:
+										webbrowser.open(inv_path)
+									else:
+										pass
+
+								else:
+									AppServices.emailer.create_invoice_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, inv, inv_date, inv_terms, inv_balance, cc_string)
+									sent_item = self.listWidget_2.currentRow()
+									self.listWidget_2.takeItem(sent_item)
+									self.console_log(f'{inv} was sent!')
+
+									if self.checkBox_2.checkState() == 2:
+										webbrowser.open(inv_path)
+									else:
+										pass
+									
+					items_count = self.listWidget_2.count()
+					self.label_17.setText(str(items_count))
+
+				except:
+					self.console_log('Error with Quickbooks API call - Invoice number may not exist in QuickBooks')
 		else:
-			selected_num = self.spinBox.value()
-			output_path = self.lineEdit_4.text()
-			item = self.listWidget_2.currentItem()
-			item_name = item.text()
-			i = (self.lineEdit_3.text() + '\\' + item_name)
-			inv_path = i.replace('/','\\')
-			output = (output_path + '\\' + item_name)
+			self.console_log('No QuickBooks account linked. Please link account in \"Settings\" tab.')
 
-			try:
-				QBservices.check_token()
-				inv = item_name[0:selected_num]
-				inv_tuple = qb_operations.get_invoice_details(inv)
-				inv_terms = inv_tuple[3]
-				inv_balance = inv_tuple[1]
-				inv_date = inv_tuple[2]
-				customer_name = inv_tuple[0]
-				customer_ref = inv_tuple[4]
-				cc_string = self.lineEdit_5.text()
-			
-				for i in Customer.customers:
-					if i.name == customer_name:
-						if i.prt == True:
-
-							webbrowser.open(inv_path)
-							sent_item = self.listWidget_2.currentRow()
-							self.listWidget_2.takeItem(sent_item)
-							self.console_log(f'{inv} was printed!')
-
-						elif i.prt == False:
-							if self.checkBox.checkState() == 2:
-
-								email_custom = self.textEdit.toHtml()
-								AppServices.emailer.create_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, email_custom, cc_string)
-								sent_item = self.listWidget_2.currentRow()
-								self.listWidget_2.takeItem(sent_item)
-								self.console_log(f'{inv} was sent!')
-								
-								if self.checkBox_2.checkState() == 2:
-									webbrowser.open(inv_path)
-								else:
-									pass
-
-							else:
-								AppServices.emailer.create_invoice_email(i.email, f' Wise Transport, LLC - Invoice {inv} // {customer_name} - {customer_ref}', inv_path, inv, inv_date, inv_terms, inv_balance, cc_string)
-								sent_item = self.listWidget_2.currentRow()
-								self.listWidget_2.takeItem(sent_item)
-								self.console_log(f'{inv} was sent!')
-
-								if self.checkBox_2.checkState() == 2:
-									webbrowser.open(inv_path)
-								else:
-									pass
-								
-				items_count = self.listWidget_2.count()
-				self.label_17.setText(str(items_count))
-
-			except:
-				self.console_log('Error with Quickbooks API call - Invoice number may not exist in QuickBooks')
 
 	def combineSelected(self):
-		if self.listWidget.currentItem() == None:
-			self.console_log('Nothing selected from Combine list')
+		status = self.check_connect_status()
 
+		if status == True:
+			if self.listWidget.currentItem() == None:
+				self.console_log('Nothing selected from Combine list')
+
+			else:
+
+				output_path = self.lineEdit_2.text()
+				item = self.listWidget.currentItem()
+				itemText = item.text()
+				in_path = (self.lineEdit.text() + '\\' +itemText)
+				pod_path = in_path.replace('/', '\\')
+				selected_num = self.spinBox.value()
+				try:
+					QBservices.check_token()
+					invId = qb_operations.get_id(itemText[0:selected_num])
+					inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
+
+					merger = PdfFileMerger()
+					merger.append(pod_path)
+					merger.merge(0, inv_pdf)
+					merger.write(output_path + '\\' + itemText[:-4] + ' -C' + '.pdf')
+					merger.close()
+
+					os.remove(inv_pdf)
+					os.remove(pod_path)
+
+					#removes selected item from list
+					i = self.listWidget.currentRow()
+					self.listWidget.takeItem(i)
+
+					#updates number of files label
+					numberOfItems = self.listWidget.count()
+					self.label_16.setText(str(numberOfItems))
+
+				except:
+					self.console_log('Error Combining! - Invoice number may not exist in Quickbooks')
 		else:
-
-			output_path = self.lineEdit_2.text()
-			item = self.listWidget.currentItem()
-			itemText = item.text()
-			in_path = (self.lineEdit.text() + '\\' +itemText)
-			pod_path = in_path.replace('/', '\\')
-			selected_num = self.spinBox.value()
-			try:
-				QBservices.check_token()
-				invId = qb_operations.get_id(itemText[0:selected_num])
-				inv_pdf = qb_operations.dwnld_pdf(invId,output_path)
-
-				merger = PdfFileMerger()
-				merger.append(pod_path)
-				merger.merge(0, inv_pdf)
-				merger.write(output_path + '\\' + itemText[:-4] + ' -C' + '.pdf')
-				merger.close()
-
-				os.remove(inv_pdf)
-				os.remove(pod_path)
-
-				#removes selected item from list
-				i = self.listWidget.currentRow()
-				self.listWidget.takeItem(i)
-
-				#updates number of files label
-				numberOfItems = self.listWidget.count()
-				self.label_16.setText(str(numberOfItems))
-
-			except:
-				self.console_log('Error Combining! - Invoice number may not exist in Quickbooks')	
+			self.console_log('No QuickBooks account linked. Please link account in \"Settings\" tab.')	
 
 	def refresh_customer_list(self):
-		
-		QBservices.check_token()
-		self.listWidget_3.clear()
-		Customer.customers.clear()
-		current_time = datetime.now()
-		dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
-		self.label_13.setText(dt_string)
-		cust_dict = qb_operations.get_all_customers()
+		status = self.check_connect_status()
+		if status == True:		
+			QBservices.check_token()
+			self.listWidget_3.clear()
+			Customer.customers.clear()
+			current_time = datetime.now()
+			dt_string = current_time.strftime("%m/%d/%Y %H:%M:%S")
+			self.label_13.setText(dt_string)
+			cust_dict = qb_operations.get_all_customers()
 
-		for cust in cust_dict:
-			item = QListWidgetItem(cust['DisplayName'])
-			item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-			item.setCheckState(QtCore.Qt.Unchecked)
-			self.listWidget_3.addItem(item)
-		
-			try:
-				cName = cust['DisplayName']
-				cEmail = cust['PrimaryEmailAddr']['Address']
+			for cust in cust_dict:
+				item = QListWidgetItem(cust['DisplayName'])
+				item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+				item.setCheckState(QtCore.Qt.Unchecked)
+				self.listWidget_3.addItem(item)
+			
+				try:
+					cName = cust['DisplayName']
+					cEmail = cust['PrimaryEmailAddr']['Address']
 
-			except:
-				cName = cust['DisplayName']
-				cEmail = None
+				except:
+					cName = cust['DisplayName']
+					cEmail = None
 
-			Customer.new(cName, cEmail, False)
+				Customer.new(cName, cEmail, False)
+		else:
+			self.error_window('Not Connected', 'No QuickBooks account linked. Please link account by clicking \"Setup\".')
 
 	def refresh_prt_state(self):
 		all_items = [self.listWidget_3.item(x) for x in range(self.listWidget_3.count())]
@@ -326,4 +418,5 @@ widget.setFixedSize(501,590)
 widget.setWindowTitle('PDF Combine-Send')
 widget.show()
 mainwindow.load_settings()
+mainwindow.check_connect_status()
 sys.exit(app.exec_())
