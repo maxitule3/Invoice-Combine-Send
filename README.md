@@ -7,7 +7,18 @@ Once connected, you will be able to pull a list of all your customers from quick
 
 # Instructions
 
-Coming soon...
+1. Clone repository
+2. Create a file named config.json and structure as shown below...
+{
+    "sandbox_api_key": "AB799PNBZztbbyvxbEiAYdrqaZKJ8AtPTDKd4bGXEynTAX6io0",
+    "sandbox_api_secret":"J116EgsHt9m7I7PSjvOPzU62zFH8imHtCrQ0dYi9",
+    "api_key":"ABDv92UgFiyYHsfcoWme4xmF267A57czAhZNdHWV0kqQfJK2XY",
+    "api_secret":"FJpqo6lyeJZp8WJIUH84osCx2ZD6SMC70sbopWGB"
+}
+
+3. Configure config.py by changing "ENVIRONMENT" to either "Production" or "Sandbox"
+4. Launch app.py
+
 
 # Version Notes
 
