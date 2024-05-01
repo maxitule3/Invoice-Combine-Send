@@ -9,7 +9,7 @@ Once connected, you will be able to pull a list of all your customers from quick
 
 1. Clone repository
 2. Create a file named config.json and structure as shown below...
-{
+4. {
     "sandbox_api_key": "AB799PNBZztbbyvxbEiAYdrqaZKJ8AtPTDKd4bGXEynTAX6io0",
     "sandbox_api_secret":"J116EgsHt9m7I7PSjvOPzU62zFH8imHtCrQ0dYi9",
     "api_key":"ABDv92UgFiyYHsfcoWme4xmF267A57czAhZNdHWV0kqQfJK2XY",
