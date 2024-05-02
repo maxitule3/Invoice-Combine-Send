@@ -2,8 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-#config files
 config.json
 .venv
 .venv/
@@ -11,6 +9,7 @@ config.json
 .idea/
 __pycache__
 data.sqlite3
+.sqlite3
 
 # C extensions
 *.so

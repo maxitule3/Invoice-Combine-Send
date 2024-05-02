@@ -1,7 +1,8 @@
 import database
 
 class UserSettings:
-    def __init__(self, tag_number_value=1, cc_email='', invoice_length=5, combiner_input='', combiner_output='', sender_input=''):
+
+    def __init__(self, tag_number_value=1, cc_email='', invoice_length=5, combiner_input='', combiner_output='', sender_input='', use_custom_body:int=0, custom_body:str=''):
         
         self.tag_number_value = tag_number_value
         self.cc_email = cc_email
@@ -10,6 +11,8 @@ class UserSettings:
         self.combiner_output = combiner_output
         self.sender_input = sender_input
         self.tag_number_value = tag_number_value
+        self.use_custom_body = use_custom_body
+        self.custom_body = custom_body
 
     def save_settings(self):
         #Connects to database defined in Database.py
@@ -21,12 +24,12 @@ class UserSettings:
         result = cursor.fetchone()
         if result:
             # Update existing customer
-            cursor.execute("UPDATE user_settings SET tag_number_value = ?, cc_email = ?, invoice_length = ?, combiner_input = ?, combiner_output = ?, sender_input = ? ",
-                           (self.tag_number_value, self.cc_email, self.invoice_length, self.combiner_input, self.combiner_output, self.sender_input))
+            cursor.execute("UPDATE user_settings SET tag_number_value = ?, cc_email = ?, invoice_length = ?, combiner_input = ?, combiner_output = ?, sender_input = ?, use_custom_body = ?, custom_body = ? ",
+                           (self.tag_number_value, self.cc_email, self.invoice_length, self.combiner_input, self.combiner_output, self.sender_input, self.use_custom_body, self.custom_body))
         else:
             # Insert new customer
-            cursor.execute("INSERT INTO user_settings (tag_number_value, cc_email, invoice_length, combiner_input, combiner_output, sender_input) VALUES (?,?,?,?,?,?) ",
-                           (self.tag_number_value, self.cc_email, self.invoice_length, self.combiner_input, self.combiner_output, self.sender_input))
+            cursor.execute("INSERT INTO user_settings (tag_number_value, cc_email, invoice_length, combiner_input, combiner_output, sender_input, use_custom_body, custom_body) VALUES (?,?,?,?,?,?,?,?) ",
+                           (self.tag_number_value, self.cc_email, self.invoice_length, self.combiner_input, self.combiner_output, self.sender_input, self.use_custom_body, self.custom_body))
         conn.commit()
         conn.close()
 
@@ -58,7 +61,3 @@ class UserSettingsFactory:
 
             return user_settings
         
-        
-
-#a = UserSettingsFactory.get_user_settings()
-#print(a)

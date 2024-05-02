@@ -68,7 +68,3 @@ def construct_email(invoice_object:Invoice, customer_object:Customer, cc_email:s
     mail_item.Display(False)
     mail_item.Attachments.Add(attachment_path)
 
-
-
-
-#email_body = emailservices.EmailFactory.construct_email_body(use_custom_body=custom_email_bool, custom_body=)

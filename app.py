@@ -97,6 +97,8 @@ class MainWindow(QMainWindow):
         self.lineEdit.setText(user_settings.combiner_input)
         self.lineEdit_2.setText(user_settings.combiner_output)
         self.lineEdit_3.setText(user_settings.sender_input)
+        self.checkBox.setCheckState(user_settings.use_custom_body)
+        self.textEdit.setText(user_settings.custom_body)
 
 
     def save_user_settings(self)->None:
@@ -106,7 +108,9 @@ class MainWindow(QMainWindow):
                                      invoice_length=self.spinBox.value(),
                                      combiner_input=self.lineEdit.text(),
                                      combiner_output=self.lineEdit_2.text(),
-                                     sender_input=self.lineEdit_3.text())
+                                     sender_input=self.lineEdit_3.text(),
+                                     use_custom_body=self.checkBox.checkState(),
+                                     custom_body=self.textEdit.toPlainText())
         user_settings.save_settings()
 
 
