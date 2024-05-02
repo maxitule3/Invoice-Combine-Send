@@ -17,7 +17,7 @@ def get_oauth_url()->str:
 def get_tokens(realm_id:str, access_code:str)-> CompanyToken:
     auth_client = AuthClient( config.get_api_key(), config.get_api_secret(), config.REDIRECT_URI, config.ENVIRONMENT )
     auth_client.get_bearer_token(realm_id=realm_id, auth_code=access_code)
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = config.get_environment()
     url = f'{base_url}/v3/company/{auth_client.realm_id}/companyinfo/{auth_client.realm_id}'
     headers = {
         'Authorization': f'Bearer {auth_client.access_token}',
@@ -31,11 +31,18 @@ def get_tokens(realm_id:str, access_code:str)-> CompanyToken:
     except:
         #Create better error responce: should return string to app or raise error // not sure yet
         print('Error! Unssuccessful API call, Something went wrong')
-    token = CompanyToken(refresh_token=str(auth_client.refresh_token),
-                         access_token=str(auth_client.access_token),
-                         company_name=str(response_dict['CompanyInfo']['CompanyName']),
-                         realm_id=realm_id
-                         )
+
+    try:    
+        token = CompanyToken(refresh_token=str(auth_client.refresh_token),
+                                access_token=str(auth_client.access_token),
+                                company_name=str(response_dict['CompanyInfo']['CompanyName']),
+                                realm_id=realm_id
+                                )
+    except:
+        print('Something went wrong setting comnpanytoken values')
+        print(response_dict)
+        return
+
     return token
 
 

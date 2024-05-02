@@ -53,7 +53,7 @@ class UserSettingsFactory:
             # Update existing customer
             return UserSettings(*result)
         else:
-            print('didint find')
+            print('didint find user settings')
             user_settings = UserSettings()
 
             return user_settings

@@ -2,7 +2,7 @@ import json
 
 
 #enter 'Production' for a production environment and 'Sandbox' for a sandbox environment
-ENVIRONMENT = 'Sandbox' 
+ENVIRONMENT = 'Production' 
 REDIRECT_URI = 'https://example.com/'
 
 

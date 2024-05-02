@@ -49,6 +49,7 @@ class WebWindow(QMainWindow):
  
         except:
             print('Error getting parameters from url or commiting values to DataBase')
+            return
 
         company_token = oauthservices.get_tokens(realm_id=captured_realmid,access_code=captured_code)
         CompanyTokenFactory.upsert(company_token=company_token)
